@@ -3,14 +3,13 @@ package internal
 import "time"
 
 const (
-	creation = EventKind("creation")
-	transaction = EventKind("transaction")
-
 	accountAlreadyInitialized = Violation("account-already-initialized")
 )
 
 type (
-	EventKind string
+	Timer interface {
+		Now() time.Time
+	}
 	Violation string
 	Account   struct {
 		ActiveCard bool
@@ -22,52 +21,76 @@ type (
 		time.Time
 	}
 	Event struct {
-		kind EventKind
-		Account
+		*Account
+		*Transaction
+	}
+	InputEvent struct {
+		Event
+	}
+	OutputEvent struct {
+		Event
 		Violations []Violation
 	}
 	Timeline struct {
-		events []Event
+		events []OutputEvent
+		timer Timer
 	}
 )
 
 func NewTimeline() Timeline {
-	return Timeline{events: make([]Event, 0)}
+	return Timeline{events: make([]OutputEvent, 0)}
 }
 
-func (t *Timeline) AddCreationEvent(acc Account) {
+func (t *Timeline) ProcessEvent(ie InputEvent) {
+	if ie.isInitializationEvent() {
+		t.InitializeAccount(*ie.Account)
+		return
+	}
+
+	t.ProcessTransaction(*ie.Transaction)
+}
+
+func (t *Timeline) InitializeAccount(acc Account) {
 	violations := make([]Violation, 0)
-	currentState := acc
+	newAccountState := acc
 	if len(t.events) > 0 {
 		violations = append(violations, accountAlreadyInitialized)
-		currentState = t.events[0].Account
+		newAccountState = *t.events[0].Account
 	} else {
 		violations = append(violations, "")
 	}
 
-	t.events = append(t.events, Event{
-		kind: creation,
-		Account:    currentState,
+	t.events = append(t.events, OutputEvent{
+		Event: Event{
+			Account:     &newAccountState,
+			Transaction: &Transaction{"ISSUER", newAccountState.AvailableLimit, t.timer.Now()},
+		},
 		Violations: violations,
 	})
 }
 
 func (t *Timeline) ProcessTransaction(tr Transaction) {
 	violations := []Violation{""}
-	newAvailableLimit := t.events[len(t.events)-1].Account.AvailableLimit - tr.Amount
+	currentAccountState := t.events[len(t.events)-1].Account
+	newAccountState := Account{
+		ActiveCard:     true,
+		AvailableLimit: currentAccountState.AvailableLimit - tr.Amount,
+	}
 
-	t.events = append(t.events, Event{
-		kind: transaction,
-		Account:    Account{
-			ActiveCard:     true,
-			AvailableLimit: newAvailableLimit,
+	t.events = append(t.events, OutputEvent{
+		Event: Event{
+			Account:     &newAccountState,
+			Transaction: &tr,
 		},
 		Violations: violations,
 	})
 }
 
-
-func (t Timeline) Events() []Event {
+func (t Timeline) Events() []OutputEvent {
 	return t.events
+}
+
+func (e Event) isInitializationEvent() bool {
+	return e.Account != nil
 }
 
