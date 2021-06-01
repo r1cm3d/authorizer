@@ -11,7 +11,7 @@ func TestCreateAnAccount(t *testing.T) {
 		AvailableLimit: 750,
 	}
 	want := Event{
-		kind: "creation",
+		kind: EventKind("creation"),
 		Account: Account{
 			ActiveCard: true,
 			AvailableLimit: 750,
@@ -29,3 +29,43 @@ func TestCreateAnAccount(t *testing.T) {
 		t.Errorf("want: %v, got: %v", want, got)
 	}
 }
+
+func TestCreateAnAccountAlreadyInitialized(t *testing.T) {
+	firstIn := Account{
+		ActiveCard: true,
+		AvailableLimit: 175,
+	}
+	secondIn := Account{
+		ActiveCard: true,
+		AvailableLimit: 350,
+	}
+	want := []Event{{
+		kind: EventKind("creation"),
+		Account: Account{
+			ActiveCard:     true,
+			AvailableLimit: 175,
+		},
+		Violations: []Violation{
+			Violation(""),
+		}},
+		{
+			kind: EventKind("creation"),
+			Account: Account{
+				ActiveCard:     true,
+				AvailableLimit: 175,
+			},
+			Violations: []Violation{
+				Violation("account-already-initialized"),
+			}},
+	}
+
+	timeline := NewTimeline()
+	timeline.AddCreationEvent(firstIn)
+	timeline.AddCreationEvent(secondIn)
+	got := timeline.Events()
+
+	if !reflect.DeepEqual(got[1], want[1]) {
+		t.Errorf("want: %v, got: %v", want[1], got[1])
+	}
+}
+

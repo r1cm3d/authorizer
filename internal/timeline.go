@@ -3,6 +3,8 @@ package internal
 const (
 	creation = EventKind("creation")
 	transaction = EventKind("transaction")
+
+	accountAlreadyInitialized = Violation("account-already-initialized")
 )
 
 type (
@@ -27,10 +29,19 @@ func NewTimeline() Timeline {
 }
 
 func (t *Timeline) AddCreationEvent(acc Account) {
+	violations := make([]Violation, 0)
+	currentState := acc
+	if len(t.events) > 0 {
+		violations = append(violations, accountAlreadyInitialized)
+		currentState = t.events[0].Account
+	} else {
+		violations = append(violations, "")
+	}
+
 	t.events = append(t.events, Event{
 		kind: creation,
-		Account:    acc,
-		Violations: []Violation{""},
+		Account:    currentState,
+		Violations: violations,
 	})
 }
 
