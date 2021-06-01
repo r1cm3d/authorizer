@@ -3,8 +3,10 @@ package internal
 import (
 	"reflect"
 	"testing"
+	"time"
 )
 
+// TODO: merge this two tests
 func TestCreateAnAccount(t *testing.T) {
 	in := Account{
 		ActiveCard: true,
@@ -30,6 +32,7 @@ func TestCreateAnAccount(t *testing.T) {
 	}
 }
 
+// TODO: merge this two tests
 func TestCreateAnAccountAlreadyInitialized(t *testing.T) {
 	firstIn := Account{
 		ActiveCard: true,
@@ -64,8 +67,47 @@ func TestCreateAnAccountAlreadyInitialized(t *testing.T) {
 	timeline.AddCreationEvent(secondIn)
 	got := timeline.Events()
 
-	if !reflect.DeepEqual(got[1], want[1]) {
-		t.Errorf("want: %v, got: %v", want[1], got[1])
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("want: %v, got: %v", want, got)
 	}
 }
 
+func TestCreateProcessSucessfulTransaction(t *testing.T) {
+	account := Account{
+		ActiveCard: true,
+		AvailableLimit: 100,
+	}
+	transaction := Transaction{
+		Merchant: "Burger King",
+		Amount: 20,
+		Time: time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC),
+	}
+	want := []Event{{
+		kind: EventKind("creation"),
+		Account: Account{
+			ActiveCard:     true,
+			AvailableLimit: 100,
+		},
+		Violations: []Violation{
+			Violation(""),
+		}},
+		{
+			kind: EventKind("transaction"),
+			Account: Account{
+				ActiveCard:     true,
+				AvailableLimit: 80,
+			},
+			Violations: []Violation{
+				Violation(""),
+			}},
+	}
+
+	timeline := NewTimeline()
+	timeline.AddCreationEvent(account)
+	timeline.ProcessTransaction(transaction)
+	got := timeline.Events()
+
+	if !reflect.DeepEqual(got[1], want[1]) {
+		t.Errorf("want: %v, got: %v", want, got)
+	}
+}

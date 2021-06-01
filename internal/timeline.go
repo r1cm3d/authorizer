@@ -1,5 +1,7 @@
 package internal
 
+import "time"
+
 const (
 	creation = EventKind("creation")
 	transaction = EventKind("transaction")
@@ -13,6 +15,11 @@ type (
 	Account   struct {
 		ActiveCard bool
 		AvailableLimit int
+	}
+	Transaction struct {
+		Merchant string
+		Amount int
+		time.Time
 	}
 	Event struct {
 		kind EventKind
@@ -44,6 +51,21 @@ func (t *Timeline) AddCreationEvent(acc Account) {
 		Violations: violations,
 	})
 }
+
+func (t *Timeline) ProcessTransaction(tr Transaction) {
+	violations := []Violation{""}
+	newAvailableLimit := t.events[len(t.events)-1].Account.AvailableLimit - tr.Amount
+
+	t.events = append(t.events, Event{
+		kind: transaction,
+		Account:    Account{
+			ActiveCard:     true,
+			AvailableLimit: newAvailableLimit,
+		},
+		Violations: violations,
+	})
+}
+
 
 func (t Timeline) Events() []Event {
 	return t.events
