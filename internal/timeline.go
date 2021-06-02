@@ -1,9 +1,14 @@
 package internal
 
-import "time"
+import (
+	"sort"
+	"time"
+)
 
 const (
 	accountAlreadyInitialized = Violation("account-already-initialized")
+	accountNotInitialized = Violation("account-not-initialized")
+	cardNotActive = Violation("card-not-active")
 )
 
 type (
@@ -12,12 +17,12 @@ type (
 	}
 	Violation string
 	Account   struct {
-		ActiveCard bool
+		ActiveCard     bool
 		AvailableLimit int
 	}
 	Transaction struct {
 		Merchant string
-		Amount int
+		Amount   int
 		time.Time
 	}
 	Event struct {
@@ -33,7 +38,7 @@ type (
 	}
 	Timeline struct {
 		events []OutputEvent
-		timer Timer
+		timer  Timer
 	}
 )
 
@@ -56,8 +61,6 @@ func (t *Timeline) InitializeAccount(acc Account) {
 	if len(t.events) > 0 {
 		violations = append(violations, accountAlreadyInitialized)
 		newAccountState = *t.events[0].Account
-	} else {
-		violations = append(violations, "")
 	}
 
 	t.events = append(t.events, OutputEvent{
@@ -70,20 +73,91 @@ func (t *Timeline) InitializeAccount(acc Account) {
 }
 
 func (t *Timeline) ProcessTransaction(tr Transaction) {
-	violations := []Violation{""}
-	currentAccountState := t.events[len(t.events)-1].Account
-	newAccountState := Account{
-		ActiveCard:     true,
-		AvailableLimit: currentAccountState.AvailableLimit - tr.Amount,
+	violations := t.checkTransactionViolations(tr)
+	lastValidAccountState := t.lastCardActive()
+
+	if len(violations) > 0 {
+		oe := OutputEvent{
+			Event: Event{
+				Account:     lastValidAccountState,
+				Transaction: &tr,
+			},
+			Violations: violations,
+		}
+		t.events = append(t.events, oe)
+		return
 	}
 
-	t.events = append(t.events, OutputEvent{
+	newAccountState := Account{
+		ActiveCard:     true,
+		AvailableLimit: lastValidAccountState.AvailableLimit - tr.Amount,
+	}
+	oe := OutputEvent{
 		Event: Event{
 			Account:     &newAccountState,
 			Transaction: &tr,
 		},
 		Violations: violations,
+	}
+	t.events = append(t.events, oe)
+}
+
+func (t Timeline) checkTransactionViolations(_ Transaction) []Violation {
+	violations := make([]Violation, 0)
+
+	if lastInitializedAccount := t.lastInitializedAccount(); lastInitializedAccount == nil {
+		// TODO: check if this violation is exclusive
+		violations = append(violations, accountNotInitialized)
+		return violations
+	}
+
+	if lastCardActive := t.lastCardActive(); lastCardActive == nil {
+		violations = append(violations, cardNotActive)
+	}
+
+	return violations
+}
+
+// TODO: merge this two methods
+func (t Timeline) lastInitializedAccount() *Account {
+	if len(t.events) <= 0 {
+		return nil
+	}
+
+	sortedEvents := make([]OutputEvent, len(t.events))
+	copy(sortedEvents, t.events)
+	//TODO: check if is this really need
+	sort.Slice(sortedEvents, func(i, j int) bool {
+		return i > j
 	})
+	i := sort.Search(len(sortedEvents), func(i int) bool { return sortedEvents[i].Account != nil })
+
+	if i == len(sortedEvents) {
+		return nil
+	}
+
+	return sortedEvents[i].Account
+}
+
+// TODO: merge this two methods
+func (t Timeline) lastCardActive() *Account {
+	if len(t.events) <= 0 {
+		return nil
+	}
+
+	sortedEvents := make([]OutputEvent, len(t.events))
+	copy(sortedEvents, t.events)
+	//TODO: check if is this really need
+	sort.Slice(sortedEvents, func(i, j int) bool {
+		return i > j
+	})
+	i := sort.Search(len(sortedEvents), func(i int) bool { return sortedEvents[i].ActiveCard })
+
+	if i < 0 {
+		return nil
+	}
+
+	return sortedEvents[i].Account
 }
 
 func (t Timeline) Events() []OutputEvent {
@@ -93,4 +167,3 @@ func (t Timeline) Events() []OutputEvent {
 func (e Event) isInitializationEvent() bool {
 	return e.Account != nil
 }
-

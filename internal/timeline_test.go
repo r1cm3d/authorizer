@@ -12,9 +12,10 @@ func TestTimeline_ProcessEvent(t *testing.T) {
 		in   []InputEvent
 		want []OutputEvent
 	}{
-		{"Initialize an account", initializeAccountInput, initializeAccountOutput},
-		{"Account already initialized", accountAlreadyInitializedInput, accountAlreadyInitializedOutput},
-		{"Successful transaction", successfulTransactionInput, successfulTransactionOutput},
+		{"successful-initialization", initializeAccountInput, initializeAccountOutput},
+		{"successful-transaction", successfulTransactionInput, successfulTransactionOutput},
+		{"account-already-initialized", accountAlreadyInitializedInput, accountAlreadyInitializedOutput},
+		{"account-not-initialized", accountNotInitializedInput, accountNotInitializedOutput},
 	}
 
 	for _, c := range cases {
@@ -56,9 +57,7 @@ var (
 				Time:     now,
 			},
 		},
-		Violations: []Violation{
-			Violation(""),
-		},
+		Violations: make([]Violation, 0),
 	}}
 	accountAlreadyInitializedInput = []InputEvent{
 		{
@@ -92,9 +91,7 @@ var (
 				Time:     now,
 			},
 		},
-		Violations: []Violation{
-			Violation(""),
-		}},
+		Violations: make([]Violation, 0)},
 		{
 			Event: Event{
 				Account: &Account{
@@ -145,9 +142,7 @@ var (
 				Time:     now,
 			},
 		},
-		Violations: []Violation{
-			Violation(""),
-		}},
+		Violations: make([]Violation, 0)},
 		{
 			Event: Event{
 				Account: &Account{
@@ -160,9 +155,33 @@ var (
 					Time:     trTime,
 				},
 			},
-			Violations: []Violation{
-				Violation(""),
-			}},
+			Violations: make([]Violation, 0)},
+	}
+
+	accountNotInitializedInput = []InputEvent{
+		{
+			Event: Event{
+				Account: nil,
+				Transaction: &Transaction{
+					Merchant: "Burger King",
+					Amount:   20,
+					Time:     trTime,
+				},
+			},
+		},
+	}
+	accountNotInitializedOutput = []OutputEvent{{
+		Event: Event{
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "Burger King",
+				Amount:   20,
+				Time:     trTime,
+			},
+		},
+		Violations: []Violation{
+			Violation("account-not-initialized"),
+		}},
 	}
 )
 
