@@ -11,6 +11,7 @@ const (
 	cardNotActive = Violation("card-not-active")
 	insufficientLimit = Violation("insufficient-limit")
 	highFrequency = Violation("high-frequency-small-interval")
+	doubleTransaction = Violation("double-transaction")
 )
 
 type (
@@ -114,6 +115,7 @@ func (t *Timeline) ProcessTransaction(tr Transaction) {
 
 func (t Timeline) checkTransactionViolations(tr Transaction, availableLimit int) []Violation {
 	const maxAllowedHF = 3
+	const maxAllowedDT = 1
 	violations := make([]Violation, 0)
 
 	if lastInitializedAccount := t.lastInitializedAccount(); lastInitializedAccount == nil {
@@ -132,9 +134,14 @@ func (t Timeline) checkTransactionViolations(tr Transaction, availableLimit int)
 		violations = append(violations, highFrequency)
 	}
 
+	if t.dtCount(tr.Time, tr.Merchant) >= maxAllowedDT {
+		violations = append(violations, doubleTransaction)
+	}
+
 	return violations
 }
 
+//TODO: merge these two counts methods
 func (t Timeline) hfCount(ntt time.Time) (count int) {
 	const allowedIntervalInMinutes = 2
 
@@ -145,6 +152,23 @@ func (t Timeline) hfCount(ntt time.Time) (count int) {
 
 		diff := ntt.Sub(event.Time)
 		if diff.Minutes() <= allowedIntervalInMinutes {
+			count++
+		}
+	}
+
+	return
+}
+
+func (t Timeline) dtCount(ntt time.Time, mn string) (count int) {
+	const allowedIntervalInMinutes = 2
+
+	for _, event := range t.events {
+		if event.Transaction == nil {
+			continue
+		}
+
+		diff := ntt.Sub(event.Time)
+		if (diff.Minutes() <= allowedIntervalInMinutes) && (mn == event.Merchant) {
 			count++
 		}
 	}
