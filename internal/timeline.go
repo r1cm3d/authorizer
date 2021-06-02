@@ -122,10 +122,6 @@ func (t Timeline) checkTransactionViolations(tr Transaction, availableLimit int)
 		return append(violations, cardNotActive)
 	}
 
-	if len(violations) > 0 {
-		return violations
-	}
-
 	if tr.Amount > availableLimit {
 		violations = append(violations, insufficientLimit)
 	}
