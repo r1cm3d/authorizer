@@ -6,24 +6,48 @@ import (
 	"time"
 )
 
-var now = time.Now()
+func TestTimeline_ProcessEvent(t *testing.T) {
+	cases := []struct {
+		name string
+		in   []InputEvent
+		want []OutputEvent
+	}{
+		{"Initialize an account", initializeAccountInput, initializeAccountOutput},
+		{"Account already initialized", accountAlreadyInitializedInput, accountAlreadyInitializedOutput},
+		{"Successful transaction", successfulTransactionInput, successfulTransactionOutput},
+	}
 
-type mockTimer struct {}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			timeline := NewTimeline()
+			timeline.timer = mockTimer{}
 
-func (m mockTimer) Now() time.Time  {
-	return now
+			for _, ie := range c.in {
+				timeline.ProcessEvent(ie)
+			}
+
+			if got := timeline.Events(); !reflect.DeepEqual(c.want, got) {
+				t.Errorf("%s, want: %v, got: %v", c.name, c.want, got)
+			}
+		})
+	}
 }
 
-// TODO: merge this two tests
-func TestCreateAnAccount(t *testing.T) {
-	in := Account{
-		ActiveCard: true,
-		AvailableLimit: 750,
-	}
-	want := OutputEvent{
+var (
+	now = time.Now()
+	initializeAccountInput = []InputEvent{{
+		Event{
+			Account: &Account{
+				ActiveCard:     true,
+				AvailableLimit: 750,
+			},
+			Transaction: nil,
+		},
+	}}
+	initializeAccountOutput = []OutputEvent{{
 		Event: Event{
 			Account: &Account{
-				ActiveCard: true,
+				ActiveCard:     true,
 				AvailableLimit: 750,
 			},
 			Transaction: &Transaction{
@@ -35,32 +59,31 @@ func TestCreateAnAccount(t *testing.T) {
 		Violations: []Violation{
 			Violation(""),
 		},
+	}}
+	accountAlreadyInitializedInput = []InputEvent{
+		{
+			Event: Event{
+				Account: &Account{
+					ActiveCard:     true,
+					AvailableLimit: 175,
+				},
+				Transaction: nil,
+			},
+		},
+		{
+			Event: Event{
+				Account: &Account{
+					ActiveCard:     true,
+					AvailableLimit: 350,
+				},
+				Transaction: nil,
+			},
+		},
 	}
-
-	timeline := NewTimeline()
-	timeline.timer = mockTimer{}
-	timeline.InitializeAccount(in)
-	got := timeline.Events()[0]
-
-	if !reflect.DeepEqual(want, got) {
-		t.Errorf("want: %v, got: %v", want, got)
-	}
-}
-
-// TODO: merge this two tests
-func TestCreateAnAccountAlreadyInitialized(t *testing.T) {
-	firstIn := Account{
-		ActiveCard: true,
-		AvailableLimit: 175,
-	}
-	secondIn := Account{
-		ActiveCard: true,
-		AvailableLimit: 350,
-	}
-	want := []OutputEvent{{
+	accountAlreadyInitializedOutput = []OutputEvent{{
 		Event: Event{
 			Account: &Account{
-				ActiveCard: true,
+				ActiveCard:     true,
 				AvailableLimit: 175,
 			},
 			Transaction: &Transaction{
@@ -75,7 +98,7 @@ func TestCreateAnAccountAlreadyInitialized(t *testing.T) {
 		{
 			Event: Event{
 				Account: &Account{
-					ActiveCard: true,
+					ActiveCard:     true,
 					AvailableLimit: 175,
 				},
 				Transaction: &Transaction{
@@ -88,33 +111,32 @@ func TestCreateAnAccountAlreadyInitialized(t *testing.T) {
 				Violation("account-already-initialized"),
 			}},
 	}
-
-	timeline := NewTimeline()
-	timeline.timer = mockTimer{}
-	timeline.InitializeAccount(firstIn)
-	timeline.InitializeAccount(secondIn)
-	got := timeline.Events()
-
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("want: %v, got: %v", want, got)
+	trTime                     = time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC)
+	successfulTransactionInput = []InputEvent{
+		{
+			Event: Event{
+				Account: &Account{
+					ActiveCard:     true,
+					AvailableLimit: 100,
+				},
+				Transaction: nil,
+			},
+		},
+		{
+			Event: Event{
+				Account: nil,
+				Transaction: &Transaction{
+					Merchant: "Burger King",
+					Amount:   20,
+					Time:     trTime,
+				},
+			},
+		},
 	}
-}
-
-func TestCreateProcessSuccessfulTransaction(t *testing.T) {
-	account := Account{
-		ActiveCard: true,
-		AvailableLimit: 100,
-	}
-	trTime := time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC)
-	transaction := Transaction{
-		Merchant: "Burger King",
-		Amount: 20,
-		Time: trTime,
-	}
-	want := []OutputEvent{{
+	successfulTransactionOutput = []OutputEvent{{
 		Event: Event{
 			Account: &Account{
-				ActiveCard: true,
+				ActiveCard:     true,
 				AvailableLimit: 100,
 			},
 			Transaction: &Transaction{
@@ -129,7 +151,7 @@ func TestCreateProcessSuccessfulTransaction(t *testing.T) {
 		{
 			Event: Event{
 				Account: &Account{
-					ActiveCard: true,
+					ActiveCard:     true,
 					AvailableLimit: 80,
 				},
 				Transaction: &Transaction{
@@ -142,14 +164,10 @@ func TestCreateProcessSuccessfulTransaction(t *testing.T) {
 				Violation(""),
 			}},
 	}
+)
 
-	timeline := NewTimeline()
-	timeline.timer = mockTimer{}
-	timeline.InitializeAccount(account)
-	timeline.ProcessTransaction(transaction)
-	got := timeline.Events()
+type mockTimer struct{}
 
-	if !reflect.DeepEqual(got[1], want[1]) {
-		t.Errorf("want: %v, got: %v", want, got)
-	}
+func (m mockTimer) Now() time.Time {
+	return now
 }
