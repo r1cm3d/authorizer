@@ -16,6 +16,7 @@ func TestTimeline_ProcessEvent(t *testing.T) {
 		{"successful-transaction", successfulTransactionInput, successfulTransactionOutput},
 		{"account-already-initialized", accountAlreadyInitializedInput, accountAlreadyInitializedOutput},
 		{"account-not-initialized", accountNotInitializedInput, accountNotInitializedOutput},
+		{"card-not-active", cardNotActiveInput, cardNotActiveOutput},
 	}
 
 	for _, c := range cases {
@@ -96,6 +97,7 @@ var (
 				accountAlreadyInitialized,
 			}},
 	}
+
 	trTime                     = time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC)
 	successfulTransactionInput = []InputEvent{
 		{
@@ -111,7 +113,7 @@ var (
 			Event: Event{
 				Account: nil,
 				Transaction: &Transaction{
-					Merchant: "Burger King",
+					Merchant: "New York Yankees",
 					Amount:   20,
 					Time:     trTime,
 				},
@@ -134,7 +136,7 @@ var (
 					AvailableLimit: 80,
 				},
 				Transaction: &Transaction{
-					Merchant: "Burger King",
+					Merchant: "New York Yankees",
 					Amount:   20,
 					Time:     trTime,
 				},
@@ -157,7 +159,7 @@ var (
 			Event: Event{
 				Account: nil,
 				Transaction: &Transaction{
-					Merchant: "Burger King",
+					Merchant: "Tampa Bay Rays",
 					Amount:   20,
 					Time:     trTime,
 				},
@@ -193,7 +195,7 @@ var (
 			Event: Event{
 				Account: nil,
 				Transaction: &Transaction{
-					Merchant: "Burger King",
+					Merchant: "Tampa Bay Rays",
 					Amount:   20,
 					Time:     trTime,
 				},
@@ -214,6 +216,56 @@ var (
 			},
 			Violations: []Violation{
 				accountNotInitialized,
+				cardNotActive,
+			},
+		},
+	}
+
+	cardNotActiveInput = []InputEvent{
+		{
+			Event: Event{
+				Account: &Account{
+					ActiveCard:     false,
+					AvailableLimit: 100,
+				},
+				Transaction: nil,
+			},
+		},
+		{
+			Event: Event{
+				Account: nil,
+				Transaction: &Transaction{
+					Merchant: "New York Yankees",
+					Amount:   20,
+					Time:     trTime,
+				},
+			},
+		},
+	}
+	cardNotActiveOutput = []OutputEvent{
+		{
+			Event: Event{
+				Account: &Account{
+					ActiveCard:     false,
+					AvailableLimit: 100,
+				},
+				Transaction: nil,
+			},
+			Violations: make([]Violation, 0),
+		},
+		{
+			Event: Event{
+				Account: &Account{
+					ActiveCard:     false,
+					AvailableLimit: 100,
+				},
+				Transaction: &Transaction{
+					Merchant: "New York Yankees",
+					Amount:   20,
+					Time:     trTime,
+				},
+			},
+			Violations: []Violation{
 				cardNotActive,
 			},
 		},

@@ -78,7 +78,7 @@ func (t *Timeline) InitializeAccount(acc Account) {
 
 func (t *Timeline) ProcessTransaction(tr Transaction) {
 	violations := t.checkTransactionViolations(tr)
-	lastValidAccountState := t.lastActiveCard()
+	lastValidAccountState := t.lastInitializedAccount()
 
 	if len(violations) > 0 {
 		oe := OutputEvent{
@@ -113,7 +113,7 @@ func (t Timeline) checkTransactionViolations(_ Transaction) []Violation {
 		violations = append(violations, accountNotInitialized)
 	}
 
-	if lastCardActive := t.lastActiveCard(); lastCardActive == nil {
+	if lastCardActive := t.lastAccountWithActiveCard(); lastCardActive == nil {
 		violations = append(violations, cardNotActive)
 	}
 
@@ -126,7 +126,7 @@ func (t Timeline) lastInitializedAccount() *Account {
 	})
 }
 
-func (t Timeline) lastActiveCard() *Account {
+func (t Timeline) lastAccountWithActiveCard() *Account {
 	return t.lastAccountByPredicate(func(events []OutputEvent, i int) bool {
 		return events[i].Account != nil && events[i].ActiveCard
 	})
