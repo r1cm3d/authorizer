@@ -189,7 +189,6 @@ var (
 			},
 			Violations: []Violation{
 				accountNotInitialized,
-				cardNotActive,
 			},
 		},
 		{
@@ -203,7 +202,6 @@ var (
 			},
 			Violations: []Violation{
 				accountNotInitialized,
-				cardNotActive,
 			},
 		},
 		{
@@ -217,7 +215,6 @@ var (
 			},
 			Violations: []Violation{
 				accountNotInitialized,
-				cardNotActive,
 			},
 		},
 	}

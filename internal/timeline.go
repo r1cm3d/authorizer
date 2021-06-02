@@ -114,13 +114,12 @@ func (t *Timeline) ProcessTransaction(tr Transaction) {
 func (t Timeline) checkTransactionViolations(tr Transaction, availableLimit int) []Violation {
 	violations := make([]Violation, 0)
 
-	// TODO: change this two validations to exclusive
 	if lastInitializedAccount := t.lastInitializedAccount(); lastInitializedAccount == nil {
-		violations = append(violations, accountNotInitialized)
+		return append(violations, accountNotInitialized)
 	}
 
 	if lastCardActive := t.lastAccountWithActiveCard(); lastCardActive == nil {
-		violations = append(violations, cardNotActive)
+		return append(violations, cardNotActive)
 	}
 
 	if len(violations) > 0 {
