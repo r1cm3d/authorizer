@@ -17,6 +17,7 @@ func TestTimeline_ProcessEvent(t *testing.T) {
 		{"account-already-initialized", accountAlreadyInitializedInput, accountAlreadyInitializedOutput},
 		{"account-not-initialized", accountNotInitializedInput, accountNotInitializedOutput},
 		{"card-not-active", cardNotActiveInput, cardNotActiveOutput},
+		{"insufficient-limit", insufficientLimitInput, insufficientLimitOutput},
 	}
 
 	for _, c := range cases {
@@ -267,6 +268,106 @@ var (
 			},
 			Violations: []Violation{
 				cardNotActive,
+			},
+		},
+	}
+
+	insufficientLimitInput = []InputEvent{
+		{
+			Event: Event{
+				Account: &Account{
+					ActiveCard:     true,
+					AvailableLimit: 100,
+				},
+				Transaction: nil,
+			},
+		},
+		{
+			Event: Event{
+				Account: nil,
+				Transaction: &Transaction{
+					Merchant: "Pittsburgh Pirates",
+					Amount:   101,
+					Time:     trTime,
+				},
+			},
+		},
+		{
+			Event: Event{
+				Account: nil,
+				Transaction: &Transaction{
+					Merchant: "Chicago White Sox",
+					Amount:   98,
+					Time:     trTime,
+				},
+			},
+		},
+		{
+			Event: Event{
+				Account: nil,
+				Transaction: &Transaction{
+					Merchant: "St. Louis Cardinals",
+					Amount:   5,
+					Time:     trTime,
+				},
+			},
+		},
+	}
+	insufficientLimitOutput = []OutputEvent{
+		{
+			Event: Event{
+				Account: &Account{
+					ActiveCard:     true,
+					AvailableLimit: 100,
+				},
+				Transaction: nil,
+			},
+			Violations: make([]Violation, 0),
+		},
+		{
+			Event: Event{
+				Account: &Account{
+					ActiveCard:     true,
+					AvailableLimit: 100,
+				},
+				Transaction: &Transaction{
+					Merchant: "Pittsburgh Pirates",
+					Amount:   101,
+					Time:     trTime,
+				},
+			},
+			Violations: []Violation{
+				insufficientLimit,
+			},
+		},
+		{
+			Event: Event{
+				Account: &Account{
+					ActiveCard:     true,
+					AvailableLimit: 2,
+				},
+				Transaction: &Transaction{
+					Merchant: "Chicago White Sox",
+					Amount:   98,
+					Time:     trTime,
+				},
+			},
+			Violations: make([]Violation, 0),
+		},
+		{
+			Event: Event{
+				Account: &Account{
+					ActiveCard:     true,
+					AvailableLimit: 2,
+				},
+				Transaction: &Transaction{
+					Merchant: "St. Louis Cardinals",
+					Amount:   5,
+					Time:     trTime,
+				},
+			},
+			Violations: []Violation{
+				insufficientLimit,
 			},
 		},
 	}

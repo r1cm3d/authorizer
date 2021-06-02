@@ -9,6 +9,7 @@ const (
 	accountAlreadyInitialized = Violation("account-already-initialized")
 	accountNotInitialized = Violation("account-not-initialized")
 	cardNotActive = Violation("card-not-active")
+	insufficientLimit = Violation("insufficient-limit")
 )
 
 type (
@@ -77,8 +78,12 @@ func (t *Timeline) InitializeAccount(acc Account) {
 }
 
 func (t *Timeline) ProcessTransaction(tr Transaction) {
-	violations := t.checkTransactionViolations(tr)
 	lastValidAccountState := t.lastInitializedAccount()
+	availableLimit := 0
+	if lastValidAccountState != nil {
+		availableLimit = lastValidAccountState.AvailableLimit
+	}
+	violations := t.checkTransactionViolations(tr, availableLimit)
 
 	if len(violations) > 0 {
 		oe := OutputEvent{
@@ -94,7 +99,7 @@ func (t *Timeline) ProcessTransaction(tr Transaction) {
 
 	newAccountState := Account{
 		ActiveCard:     true,
-		AvailableLimit: lastValidAccountState.AvailableLimit - tr.Amount,
+		AvailableLimit: availableLimit - tr.Amount,
 	}
 	oe := OutputEvent{
 		Event: Event{
@@ -106,15 +111,24 @@ func (t *Timeline) ProcessTransaction(tr Transaction) {
 	t.events = append(t.events, oe)
 }
 
-func (t Timeline) checkTransactionViolations(_ Transaction) []Violation {
+func (t Timeline) checkTransactionViolations(tr Transaction, availableLimit int) []Violation {
 	violations := make([]Violation, 0)
 
+	// TODO: change this two validations to exclusive
 	if lastInitializedAccount := t.lastInitializedAccount(); lastInitializedAccount == nil {
 		violations = append(violations, accountNotInitialized)
 	}
 
 	if lastCardActive := t.lastAccountWithActiveCard(); lastCardActive == nil {
 		violations = append(violations, cardNotActive)
+	}
+
+	if len(violations) > 0 {
+		return violations
+	}
+
+	if tr.Amount > availableLimit {
+		violations = append(violations, insufficientLimit)
 	}
 
 	return violations
@@ -136,18 +150,21 @@ func (t Timeline) lastAccountByPredicate(pred func(events []OutputEvent, i int) 
 	if len(t.events) <= 0 {
 		return nil
 	}
-
 	sortedEvents := make([]OutputEvent, len(t.events))
 	copy(sortedEvents, t.events)
 	sort.Slice(sortedEvents, func(i, j int) bool { return i > j	})
-	i := sort.Search(len(sortedEvents), func(i int) bool {
-		return pred(sortedEvents, i) && len(sortedEvents[i].Violations) == 0
-	})
+	noViolPred := func(j int) bool {
+		return pred(sortedEvents, j) && len(sortedEvents[j].Violations) == 0
+	}
+
+	i := 0
+	if !noViolPred(0) {
+		i = sort.Search(len(sortedEvents), noViolPred)
+	}
 
 	if i == len(sortedEvents) {
 		return nil
 	}
-
 	return sortedEvents[i].Account
 }
 
