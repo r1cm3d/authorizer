@@ -46,6 +46,10 @@ func NewTimeline() Timeline {
 	return Timeline{events: make([]OutputEvent, 0)}
 }
 
+func (t Timeline) Events() []OutputEvent {
+	return t.events
+}
+
 func (t *Timeline) ProcessEvent(ie InputEvent) {
 	if ie.isInitializationEvent() {
 		t.InitializeAccount(*ie.Account)
@@ -74,7 +78,7 @@ func (t *Timeline) InitializeAccount(acc Account) {
 
 func (t *Timeline) ProcessTransaction(tr Transaction) {
 	violations := t.checkTransactionViolations(tr)
-	lastValidAccountState := t.lastCardActive()
+	lastValidAccountState := t.lastActiveCard()
 
 	if len(violations) > 0 {
 		oe := OutputEvent{
@@ -111,15 +115,22 @@ func (t Timeline) checkTransactionViolations(_ Transaction) []Violation {
 		return violations
 	}
 
-	if lastCardActive := t.lastCardActive(); lastCardActive == nil {
+	if lastCardActive := t.lastActiveCard(); lastCardActive == nil {
 		violations = append(violations, cardNotActive)
 	}
 
 	return violations
 }
 
-// TODO: merge this two methods
 func (t Timeline) lastInitializedAccount() *Account {
+	return t.lastAccountByPredicate(func(events []OutputEvent, i int) bool { return events[i].Account != nil })
+}
+
+func (t Timeline) lastActiveCard() *Account {
+	return t.lastAccountByPredicate(func(events []OutputEvent, i int) bool { return events[i].ActiveCard })
+}
+
+func (t Timeline) lastAccountByPredicate(pred func(events []OutputEvent, i int) bool) *Account {
 	if len(t.events) <= 0 {
 		return nil
 	}
@@ -130,38 +141,13 @@ func (t Timeline) lastInitializedAccount() *Account {
 	sort.Slice(sortedEvents, func(i, j int) bool {
 		return i > j
 	})
-	i := sort.Search(len(sortedEvents), func(i int) bool { return sortedEvents[i].Account != nil })
+	i := sort.Search(len(sortedEvents), func(i int) bool { return pred(sortedEvents, i) && len(sortedEvents[i].Violations) == 0 })
 
 	if i == len(sortedEvents) {
 		return nil
 	}
 
 	return sortedEvents[i].Account
-}
-
-// TODO: merge this two methods
-func (t Timeline) lastCardActive() *Account {
-	if len(t.events) <= 0 {
-		return nil
-	}
-
-	sortedEvents := make([]OutputEvent, len(t.events))
-	copy(sortedEvents, t.events)
-	//TODO: check if is this really need
-	sort.Slice(sortedEvents, func(i, j int) bool {
-		return i > j
-	})
-	i := sort.Search(len(sortedEvents), func(i int) bool { return sortedEvents[i].ActiveCard })
-
-	if i < 0 {
-		return nil
-	}
-
-	return sortedEvents[i].Account
-}
-
-func (t Timeline) Events() []OutputEvent {
-	return t.events
 }
 
 func (e Event) isInitializationEvent() bool {

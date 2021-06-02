@@ -15,6 +15,7 @@ func TestTimeline_ProcessEvent(t *testing.T) {
 		{"successful-initialization", initializeAccountInput, initializeAccountOutput},
 		{"successful-transaction", successfulTransactionInput, successfulTransactionOutput},
 		{"account-already-initialized", accountAlreadyInitializedInput, accountAlreadyInitializedOutput},
+		// TODO: improve this scenario adding more files to check sorting
 		{"account-not-initialized", accountNotInitializedInput, accountNotInitializedOutput},
 	}
 
