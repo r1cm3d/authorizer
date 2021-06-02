@@ -6,18 +6,18 @@ import (
 	"time"
 )
 
-func TestTimeline_ProcessEvent(t *testing.T) {
+func TestTimeline_Process(t *testing.T) {
 	cases := []struct {
 		name string
 		in   []InputEvent
 		want []OutputEvent
 	}{
-		{"successful-initialization", initializeAccountInput, initializeAccountOutput},
-		{"successful-transaction", successfulTransactionInput, successfulTransactionOutput},
-		{"account-already-initialized", accountAlreadyInitializedInput, accountAlreadyInitializedOutput},
-		{"account-not-initialized", accountNotInitializedInput, accountNotInitializedOutput},
-		{"card-not-active", cardNotActiveInput, cardNotActiveOutput},
-		{"insufficient-limit", insufficientLimitInput, insufficientLimitOutput},
+		{"successful-initialization", iaInput, iaOutput},
+		{"successful-transaction", sfInput, sfOutput},
+		{"account-already-initialized", aaiInput, aaiOutput},
+		{"account-not-initialized", aniInput, aniOutput},
+		{"card-not-active", cnaInput, cnaOutput},
+		{"insufficient-limit", ilInput, ilOutput},
 		{"high-frequency-small-interval", hfInput, hfOutput},
 		{"double-transaction", dtInput, dtOutput},
 		{"successful-transactions-after-hf-violation", stavInput, stavOutput},
@@ -43,7 +43,7 @@ func TestTimeline_ProcessEvent(t *testing.T) {
 var (
 	now                    = time.Now()
 
-	initializeAccountInput = []InputEvent{{
+	iaInput = []InputEvent{{
 		Event{
 			Account: &Account{
 				ActiveCard:     true,
@@ -52,7 +52,7 @@ var (
 			Transaction: nil,
 		},
 	}}
-	initializeAccountOutput = []OutputEvent{{
+	iaOutput = []OutputEvent{{
 		Event: Event{
 			Account: &Account{
 				ActiveCard:     true,
@@ -63,7 +63,7 @@ var (
 		Violations: make([]Violation, 0),
 	}}
 
-	accountAlreadyInitializedInput = []InputEvent{
+	aaiInput = []InputEvent{
 		{
 			Event: Event{
 				Account: &Account{
@@ -83,7 +83,7 @@ var (
 			},
 		},
 	}
-	accountAlreadyInitializedOutput = []OutputEvent{{
+	aaiOutput = []OutputEvent{{
 		Event: Event{
 			Account: &Account{
 				ActiveCard:     true,
@@ -105,8 +105,8 @@ var (
 			}},
 	}
 
-	trTime                     = time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC)
-	successfulTransactionInput = []InputEvent{
+	trTime  = time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC)
+	sfInput = []InputEvent{
 		{
 			Event: Event{
 				Account: &Account{
@@ -127,7 +127,7 @@ var (
 			},
 		},
 	}
-	successfulTransactionOutput = []OutputEvent{{
+	sfOutput = []OutputEvent{{
 		Event: Event{
 			Account: &Account{
 				ActiveCard:     true,
@@ -151,7 +151,7 @@ var (
 			Violations: make([]Violation, 0)},
 	}
 
-	accountNotInitializedInput = []InputEvent{
+	aniInput = []InputEvent{
 		{
 			Event: Event{
 				Account: nil,
@@ -183,7 +183,7 @@ var (
 			},
 		},
 	}
-	accountNotInitializedOutput = []OutputEvent{
+	aniOutput = []OutputEvent{
 		{
 			Event: Event{
 				Account: nil,
@@ -225,7 +225,7 @@ var (
 		},
 	}
 
-	cardNotActiveInput = []InputEvent{
+	cnaInput = []InputEvent{
 		{
 			Event: Event{
 				Account: &Account{
@@ -246,7 +246,7 @@ var (
 			},
 		},
 	}
-	cardNotActiveOutput = []OutputEvent{
+	cnaOutput = []OutputEvent{
 		{
 			Event: Event{
 				Account: &Account{
@@ -275,7 +275,7 @@ var (
 		},
 	}
 
-	insufficientLimitInput = []InputEvent{
+	ilInput = []InputEvent{
 		{
 			Event: Event{
 				Account: &Account{
@@ -316,7 +316,7 @@ var (
 			},
 		},
 	}
-	insufficientLimitOutput = []OutputEvent{
+	ilOutput = []OutputEvent{
 		{
 			Event: Event{
 				Account: &Account{

@@ -59,7 +59,7 @@ func (t *Timeline) ProcessEvent(ie InputEvent) {
 		return
 	}
 
-	t.ProcessTransaction(*ie.Transaction)
+	t.Process(*ie.Transaction)
 }
 
 func (t *Timeline) InitializeAccount(acc Account) {
@@ -79,7 +79,7 @@ func (t *Timeline) InitializeAccount(acc Account) {
 	})
 }
 
-func (t *Timeline) ProcessTransaction(tr Transaction) {
+func (t *Timeline) Process(tr Transaction) {
 	lastValidAccountState := t.lastInitializedAccount()
 	availableLimit := 0
 	if lastValidAccountState != nil {
@@ -124,7 +124,6 @@ func (t Timeline) checkTransactionViolations(tr Transaction, availableLimit int)
 	betweenFilterSameMerchant := func(e Event) bool {
 		return betweenFilter(e) && e.Merchant == tr.Merchant
 	}
-
 	violations := make([]Violation, 0)
 
 	if lastInitializedAccount := t.lastInitializedAccount(); lastInitializedAccount == nil {
