@@ -116,6 +116,15 @@ func (t *Timeline) ProcessTransaction(tr Transaction) {
 func (t Timeline) checkTransactionViolations(tr Transaction, availableLimit int) []Violation {
 	const maxAllowedHF = 3
 	const maxAllowedDT = 1
+	const minIntervalAllowed = 2
+	betweenFilter := func(e Event) bool {
+		diff := tr.Time.Sub(e.Time)
+		return diff.Minutes() <= minIntervalAllowed
+	}
+	betweenFilterSameMerchant := func(e Event) bool {
+		return betweenFilter(e) && e.Merchant == tr.Merchant
+	}
+
 	violations := make([]Violation, 0)
 
 	if lastInitializedAccount := t.lastInitializedAccount(); lastInitializedAccount == nil {
@@ -130,45 +139,25 @@ func (t Timeline) checkTransactionViolations(tr Transaction, availableLimit int)
 		violations = append(violations, insufficientLimit)
 	}
 
-	if t.hfCount(tr.Time) >= maxAllowedHF {
+	if t.count(betweenFilter) >= maxAllowedHF {
 		violations = append(violations, highFrequency)
 	}
 
-	if t.dtCount(tr.Time, tr.Merchant) >= maxAllowedDT {
+	if t.count(betweenFilterSameMerchant) >= maxAllowedDT {
 		violations = append(violations, doubleTransaction)
 	}
 
 	return violations
 }
 
-//TODO: merge these two counts methods
-func (t Timeline) hfCount(ntt time.Time) (count int) {
-	const allowedIntervalInMinutes = 2
-
+func (t Timeline) count(filter func(event Event) bool) (count int){
 	for _, event := range t.events {
+		// TODO: These two checks could be event methods
 		if event.Transaction == nil || len(event.Violations) > 0 {
 			continue
 		}
 
-		diff := ntt.Sub(event.Time)
-		if diff.Minutes() <= allowedIntervalInMinutes {
-			count++
-		}
-	}
-
-	return
-}
-
-func (t Timeline) dtCount(ntt time.Time, mn string) (count int) {
-	const allowedIntervalInMinutes = 2
-
-	for _, event := range t.events {
-		if event.Transaction == nil || len(event.Violations) > 0 {
-			continue
-		}
-
-		diff := ntt.Sub(event.Time)
-		if (diff.Minutes() <= allowedIntervalInMinutes) && (mn == event.Merchant) {
+		if filter(event.Event) {
 			count++
 		}
 	}
@@ -200,6 +189,7 @@ func (t Timeline) lastAccountByPredicate(pred func(events []OutputEvent, i int) 
 		return pred(sortedEvents, j) && len(sortedEvents[j].Violations) == 0
 	}
 
+	// TODO: change this weird name noViolPred
 	i := 0
 	if !noViolPred(0) {
 		i = sort.Search(len(sortedEvents), noViolPred)
