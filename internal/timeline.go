@@ -146,7 +146,7 @@ func (t Timeline) hfCount(ntt time.Time) (count int) {
 	const allowedIntervalInMinutes = 2
 
 	for _, event := range t.events {
-		if event.Transaction == nil {
+		if event.Transaction == nil || len(event.Violations) > 0 {
 			continue
 		}
 
@@ -163,7 +163,7 @@ func (t Timeline) dtCount(ntt time.Time, mn string) (count int) {
 	const allowedIntervalInMinutes = 2
 
 	for _, event := range t.events {
-		if event.Transaction == nil {
+		if event.Transaction == nil || len(event.Violations) > 0 {
 			continue
 		}
 
