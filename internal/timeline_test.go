@@ -18,6 +18,7 @@ func TestTimeline_ProcessEvent(t *testing.T) {
 		{"account-not-initialized", accountNotInitializedInput, accountNotInitializedOutput},
 		{"card-not-active", cardNotActiveInput, cardNotActiveOutput},
 		{"insufficient-limit", insufficientLimitInput, insufficientLimitOutput},
+		{"high-frequency-small-interval", hfInput, hfOutput},
 	}
 
 	for _, c := range cases {
@@ -38,6 +39,7 @@ func TestTimeline_ProcessEvent(t *testing.T) {
 
 var (
 	now                    = time.Now()
+
 	initializeAccountInput = []InputEvent{{
 		Event{
 			Account: &Account{
@@ -57,6 +59,7 @@ var (
 		},
 		Violations: make([]Violation, 0),
 	}}
+
 	accountAlreadyInitializedInput = []InputEvent{
 		{
 			Event: Event{
@@ -365,6 +368,130 @@ var (
 			},
 			Violations: []Violation{
 				insufficientLimit,
+			},
+		},
+	}
+
+	hfTime                     = time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC)
+	hfTime2                    = time.Date(2019, time.February, 13, 11, 1, 0, 0, time.UTC)
+	hfInput = []InputEvent{
+		{
+			Event: Event{
+				Account: &Account{
+					ActiveCard:     true,
+					AvailableLimit: 100,
+				},
+				Transaction: nil,
+			},
+		},
+		{
+			Event: Event{
+				Account: nil,
+				Transaction: &Transaction{
+					Merchant: "Atlanta Braves",
+					Amount:   10,
+					Time:     hfTime,
+				},
+			},
+		},
+		{
+			Event: Event{
+				Account: nil,
+				Transaction: &Transaction{
+					Merchant: "New York Mets",
+					Amount:   11,
+					Time:     hfTime,
+				},
+			},
+		},
+		{
+			Event: Event{
+				Account: nil,
+				Transaction: &Transaction{
+					Merchant: "Los Angeles Dodgers",
+					Amount:   12,
+					Time:     hfTime2,
+				},
+			},
+		},
+		{
+			Event: Event{
+				Account: nil,
+				Transaction: &Transaction{
+					Merchant: "Boston Red Sox",
+					Amount:   16,
+					Time:     hfTime2,
+				},
+			},
+		},
+	}
+	hfOutput = []OutputEvent{
+		{
+			Event: Event{
+				Account: &Account{
+					ActiveCard:     true,
+					AvailableLimit: 100,
+				},
+				Transaction: nil,
+			},
+			Violations: make([]Violation, 0),
+		},
+		{
+			Event: Event{
+				Account: &Account{
+					ActiveCard:     true,
+					AvailableLimit: 90,
+				},
+				Transaction: &Transaction{
+					Merchant: "Atlanta Braves",
+					Amount:   10,
+					Time:     hfTime,
+				},
+			},
+			Violations: make([]Violation, 0),
+		},
+		{
+			Event: Event{
+				Account: &Account{
+					ActiveCard:     true,
+					AvailableLimit: 79,
+				},
+				Transaction: &Transaction{
+					Merchant: "New York Mets",
+					Amount:   11,
+					Time:     hfTime,
+				},
+			},
+			Violations: make([]Violation, 0),
+		},
+		{
+			Event: Event{
+				Account: &Account{
+					ActiveCard:     true,
+					AvailableLimit: 67,
+				},
+				Transaction: &Transaction{
+					Merchant: "Los Angeles Dodgers",
+					Amount:   12,
+					Time:     hfTime2,
+				},
+			},
+			Violations: make([]Violation, 0),
+		},
+		{
+			Event: Event{
+				Account: &Account{
+					ActiveCard:     true,
+					AvailableLimit: 67,
+				},
+				Transaction: &Transaction{
+					Merchant: "Boston Red Sox",
+					Amount:   16,
+					Time:     hfTime2,
+				},
+			},
+			Violations: []Violation{
+				highFrequency,
 			},
 		},
 	}

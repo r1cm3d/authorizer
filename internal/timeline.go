@@ -10,6 +10,7 @@ const (
 	accountNotInitialized = Violation("account-not-initialized")
 	cardNotActive = Violation("card-not-active")
 	insufficientLimit = Violation("insufficient-limit")
+	highFrequency = Violation("high-frequency-small-interval")
 )
 
 type (
@@ -112,6 +113,7 @@ func (t *Timeline) ProcessTransaction(tr Transaction) {
 }
 
 func (t Timeline) checkTransactionViolations(tr Transaction, availableLimit int) []Violation {
+	const maxAllowedHF = 3
 	violations := make([]Violation, 0)
 
 	if lastInitializedAccount := t.lastInitializedAccount(); lastInitializedAccount == nil {
@@ -126,8 +128,30 @@ func (t Timeline) checkTransactionViolations(tr Transaction, availableLimit int)
 		violations = append(violations, insufficientLimit)
 	}
 
+	if t.hfCount(tr.Time) >= maxAllowedHF {
+		violations = append(violations, highFrequency)
+	}
+
 	return violations
 }
+
+func (t Timeline) hfCount(ntt time.Time) (count int) {
+	const allowedIntervalInMinutes = 2
+
+	for _, event := range t.events {
+		if event.Transaction == nil {
+			continue
+		}
+
+		diff := ntt.Sub(event.Time)
+		if diff.Minutes() <= allowedIntervalInMinutes {
+			count++
+		}
+	}
+
+	return
+}
+
 
 func (t Timeline) lastInitializedAccount() *Account {
 	return t.lastAccountByPredicate(func(events []OutputEvent, i int) bool {
