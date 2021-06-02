@@ -15,7 +15,6 @@ func TestTimeline_ProcessEvent(t *testing.T) {
 		{"successful-initialization", initializeAccountInput, initializeAccountOutput},
 		{"successful-transaction", successfulTransactionInput, successfulTransactionOutput},
 		{"account-already-initialized", accountAlreadyInitializedInput, accountAlreadyInitializedOutput},
-		// TODO: improve this scenario adding more files to check sorting
 		{"account-not-initialized", accountNotInitializedInput, accountNotInitializedOutput},
 	}
 
@@ -52,11 +51,7 @@ var (
 				ActiveCard:     true,
 				AvailableLimit: 750,
 			},
-			Transaction: &Transaction{
-				Merchant: "ISSUER",
-				Amount:   750,
-				Time:     now,
-			},
+			Transaction: nil,
 		},
 		Violations: make([]Violation, 0),
 	}}
@@ -86,11 +81,7 @@ var (
 				ActiveCard:     true,
 				AvailableLimit: 175,
 			},
-			Transaction: &Transaction{
-				Merchant: "ISSUER",
-				Amount:   175,
-				Time:     now,
-			},
+			Transaction: nil,
 		},
 		Violations: make([]Violation, 0)},
 		{
@@ -99,11 +90,7 @@ var (
 					ActiveCard:     true,
 					AvailableLimit: 175,
 				},
-				Transaction: &Transaction{
-					Merchant: "ISSUER",
-					Amount:   175,
-					Time:     now,
-				},
+				Transaction: nil,
 			},
 			Violations: []Violation{
 				accountAlreadyInitialized,
@@ -137,11 +124,7 @@ var (
 				ActiveCard:     true,
 				AvailableLimit: 100,
 			},
-			Transaction: &Transaction{
-				Merchant: "ISSUER",
-				Amount:   100,
-				Time:     now,
-			},
+			Transaction: nil,
 		},
 		Violations: make([]Violation, 0)},
 		{
@@ -203,6 +186,7 @@ var (
 			},
 			Violations: []Violation{
 				accountNotInitialized,
+				cardNotActive,
 			},
 		},
 		{
@@ -216,6 +200,7 @@ var (
 			},
 			Violations: []Violation{
 				accountNotInitialized,
+				cardNotActive,
 			},
 		},
 		{
@@ -229,6 +214,7 @@ var (
 			},
 			Violations: []Violation{
 				accountNotInitialized,
+				cardNotActive,
 			},
 		},
 	}

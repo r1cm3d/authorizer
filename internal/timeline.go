@@ -70,7 +70,7 @@ func (t *Timeline) InitializeAccount(acc Account) {
 	t.events = append(t.events, OutputEvent{
 		Event: Event{
 			Account:     &newAccountState,
-			Transaction: &Transaction{"ISSUER", newAccountState.AvailableLimit, t.timer.Now()},
+			Transaction: nil,
 		},
 		Violations: violations,
 	})
@@ -110,9 +110,7 @@ func (t Timeline) checkTransactionViolations(_ Transaction) []Violation {
 	violations := make([]Violation, 0)
 
 	if lastInitializedAccount := t.lastInitializedAccount(); lastInitializedAccount == nil {
-		// TODO: check if this violation is exclusive
 		violations = append(violations, accountNotInitialized)
-		return violations
 	}
 
 	if lastCardActive := t.lastActiveCard(); lastCardActive == nil {
