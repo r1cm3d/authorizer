@@ -53,16 +53,16 @@ func (t Timeline) Events() []OutputEvent {
 	return t.events
 }
 
-func (t *Timeline) ProcessEvent(ie InputEvent) {
-	if ie.isInitializationEvent() {
-		t.InitializeAccount(*ie.Account)
+func (t *Timeline) Process(ie InputEvent) {
+	if ie.isInitEvent() {
+		t.init(*ie.Account)
 		return
 	}
 
-	t.Process(*ie.Transaction)
+	t.add(*ie.Transaction)
 }
 
-func (t *Timeline) InitializeAccount(acc Account) {
+func (t *Timeline) init(acc Account) {
 	violations := make([]Violation, 0)
 	newAccountState := acc
 	if len(t.events) > 0 {
@@ -79,13 +79,13 @@ func (t *Timeline) InitializeAccount(acc Account) {
 	})
 }
 
-func (t *Timeline) Process(tr Transaction) {
-	lastValidAccountState := t.lastInitializedAccount()
+func (t *Timeline) add(tr Transaction) {
+	lastValidAccountState := t.lastInitAcc()
 	availableLimit := 0
 	if lastValidAccountState != nil {
 		availableLimit = lastValidAccountState.AvailableLimit
 	}
-	violations := t.checkTransactionViolations(tr, availableLimit)
+	violations := t.validate(tr, availableLimit)
 
 	if len(violations) > 0 {
 		oe := OutputEvent{
@@ -113,7 +113,7 @@ func (t *Timeline) Process(tr Transaction) {
 	t.events = append(t.events, oe)
 }
 
-func (t Timeline) checkTransactionViolations(tr Transaction, availableLimit int) []Violation {
+func (t Timeline) validate(tr Transaction, availableLimit int) []Violation {
 	const maxAllowedHF = 3
 	const maxAllowedDT = 1
 	const minIntervalAllowed = 2
@@ -126,11 +126,11 @@ func (t Timeline) checkTransactionViolations(tr Transaction, availableLimit int)
 	}
 	violations := make([]Violation, 0)
 
-	if lastInitializedAccount := t.lastInitializedAccount(); lastInitializedAccount == nil {
+	if lastInitializedAccount := t.lastInitAcc(); lastInitializedAccount == nil {
 		return append(violations, accountNotInitialized)
 	}
 
-	if lastCardActive := t.lastAccountWithActiveCard(); lastCardActive == nil {
+	if lastCardActive := t.lastActiveAcc(); lastCardActive == nil {
 		return append(violations, cardNotActive)
 	}
 
@@ -165,19 +165,19 @@ func (t Timeline) count(filter func(event Event) bool) (count int){
 }
 
 
-func (t Timeline) lastInitializedAccount() *Account {
-	return t.lastAccountByPredicate(func(events []OutputEvent, i int) bool {
+func (t Timeline) lastInitAcc() *Account {
+	return t.lastAcctByFilter(func(events []OutputEvent, i int) bool {
 		return events[i].Account != nil
 	})
 }
 
-func (t Timeline) lastAccountWithActiveCard() *Account {
-	return t.lastAccountByPredicate(func(events []OutputEvent, i int) bool {
+func (t Timeline) lastActiveAcc() *Account {
+	return t.lastAcctByFilter(func(events []OutputEvent, i int) bool {
 		return events[i].Account != nil && events[i].ActiveCard
 	})
 }
 
-func (t Timeline) lastAccountByPredicate(pred func(events []OutputEvent, i int) bool) *Account {
+func (t Timeline) lastAcctByFilter(filter func(events []OutputEvent, i int) bool) *Account {
 	if len(t.events) <= 0 {
 		return nil
 	}
@@ -185,7 +185,7 @@ func (t Timeline) lastAccountByPredicate(pred func(events []OutputEvent, i int) 
 	copy(sortedEvents, t.events)
 	sort.Slice(sortedEvents, func(i, j int) bool { return i > j	})
 	noViolPred := func(j int) bool {
-		return pred(sortedEvents, j) && len(sortedEvents[j].Violations) == 0
+		return filter(sortedEvents, j) && len(sortedEvents[j].Violations) == 0
 	}
 
 	// TODO: change this weird name noViolPred
@@ -200,6 +200,6 @@ func (t Timeline) lastAccountByPredicate(pred func(events []OutputEvent, i int) 
 	return sortedEvents[i].Account
 }
 
-func (e Event) isInitializationEvent() bool {
+func (e Event) isInitEvent() bool {
 	return e.Account != nil
 }

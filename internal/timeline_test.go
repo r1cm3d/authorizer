@@ -30,7 +30,7 @@ func TestTimeline_Process(t *testing.T) {
 			timeline.timer = mockTimer{}
 
 			for _, ie := range c.in {
-				timeline.ProcessEvent(ie)
+				timeline.Process(ie)
 			}
 
 			if got := timeline.Events(); !reflect.DeepEqual(c.want, got) {
