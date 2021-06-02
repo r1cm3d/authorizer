@@ -123,11 +123,15 @@ func (t Timeline) checkTransactionViolations(_ Transaction) []Violation {
 }
 
 func (t Timeline) lastInitializedAccount() *Account {
-	return t.lastAccountByPredicate(func(events []OutputEvent, i int) bool { return events[i].Account != nil })
+	return t.lastAccountByPredicate(func(events []OutputEvent, i int) bool {
+		return events[i].Account != nil
+	})
 }
 
 func (t Timeline) lastActiveCard() *Account {
-	return t.lastAccountByPredicate(func(events []OutputEvent, i int) bool { return events[i].ActiveCard })
+	return t.lastAccountByPredicate(func(events []OutputEvent, i int) bool {
+		return events[i].Account != nil && events[i].ActiveCard
+	})
 }
 
 func (t Timeline) lastAccountByPredicate(pred func(events []OutputEvent, i int) bool) *Account {
@@ -137,11 +141,10 @@ func (t Timeline) lastAccountByPredicate(pred func(events []OutputEvent, i int) 
 
 	sortedEvents := make([]OutputEvent, len(t.events))
 	copy(sortedEvents, t.events)
-	//TODO: check if is this really need
-	sort.Slice(sortedEvents, func(i, j int) bool {
-		return i > j
+	sort.Slice(sortedEvents, func(i, j int) bool { return i > j	})
+	i := sort.Search(len(sortedEvents), func(i int) bool {
+		return pred(sortedEvents, i) && len(sortedEvents[i].Violations) == 0
 	})
-	i := sort.Search(len(sortedEvents), func(i int) bool { return pred(sortedEvents, i) && len(sortedEvents[i].Violations) == 0 })
 
 	if i == len(sortedEvents) {
 		return nil

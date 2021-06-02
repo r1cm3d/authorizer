@@ -36,7 +36,7 @@ func TestTimeline_ProcessEvent(t *testing.T) {
 }
 
 var (
-	now = time.Now()
+	now                    = time.Now()
 	initializeAccountInput = []InputEvent{{
 		Event{
 			Account: &Account{
@@ -106,7 +106,7 @@ var (
 				},
 			},
 			Violations: []Violation{
-				Violation("account-already-initialized"),
+				accountAlreadyInitialized,
 			}},
 	}
 	trTime                     = time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC)
@@ -164,25 +164,73 @@ var (
 			Event: Event{
 				Account: nil,
 				Transaction: &Transaction{
+					Merchant: "San Francisco Giants",
+					Amount:   36,
+					Time:     trTime,
+				},
+			},
+		},
+		{
+			Event: Event{
+				Account: nil,
+				Transaction: &Transaction{
 					Merchant: "Burger King",
 					Amount:   20,
 					Time:     trTime,
 				},
 			},
 		},
-	}
-	accountNotInitializedOutput = []OutputEvent{{
-		Event: Event{
-			Account: nil,
-			Transaction: &Transaction{
-				Merchant: "Burger King",
-				Amount:   20,
-				Time:     trTime,
+		{
+			Event: Event{
+				Account: nil,
+				Transaction: &Transaction{
+					Merchant: "San Diego Padres",
+					Amount:   15,
+					Time:     trTime,
+				},
 			},
 		},
-		Violations: []Violation{
-			Violation("account-not-initialized"),
-		}},
+	}
+	accountNotInitializedOutput = []OutputEvent{
+		{
+			Event: Event{
+				Account: nil,
+				Transaction: &Transaction{
+					Merchant: "San Francisco Giants",
+					Amount:   36,
+					Time:     trTime,
+				},
+			},
+			Violations: []Violation{
+				accountNotInitialized,
+			},
+		},
+		{
+			Event: Event{
+				Account: nil,
+				Transaction: &Transaction{
+					Merchant: "Burger King",
+					Amount:   20,
+					Time:     trTime,
+				},
+			},
+			Violations: []Violation{
+				accountNotInitialized,
+			},
+		},
+		{
+			Event: Event{
+				Account: nil,
+				Transaction: &Transaction{
+					Merchant: "San Diego Padres",
+					Amount:   15,
+					Time:     trTime,
+				},
+			},
+			Violations: []Violation{
+				accountNotInitialized,
+			},
+		},
 	}
 )
 
