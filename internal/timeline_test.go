@@ -40,6 +40,31 @@ func TestTimeline_Process(t *testing.T) {
 	}
 }
 
+func TestTimeline_Last(t *testing.T) {
+	cases := []struct {
+		name string
+		in   []TimelineEvent
+		want *TimelineEvent
+	}{
+		{"with nil timeline", nil, nil},
+		{"without any event", make([]TimelineEvent, 0), nil},
+		{"with one event", tlw1Event, &tlFirstEvent},
+		{"with more than one", tlw2Events, &tlLastEvent},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			tl := Timeline{
+				events: c.in,
+				timer:  nil,
+			}
+			if got := tl.Last(); !reflect.DeepEqual(c.want, got) {
+				t.Errorf("%s, want: %s, got: %s", c.name, c.want, got)
+			}
+		})
+	}
+}
+
 var (
 	now = time.Now()
 
@@ -809,6 +834,38 @@ var (
 			},
 			Violations: make([]Violation, 0),
 		},
+	}
+
+	tlFirstEvent = TimelineEvent{
+		Event: Event{
+			Account:     &Account{
+				ActiveCard:     true,
+				AvailableLimit: 666,
+			},
+			Transaction: nil,
+		},
+		Violations: make([]Violation, 0),
+	}
+	tlLastEvent = TimelineEvent{
+		Event: Event{
+			Account:     &Account{
+				ActiveCard:     true,
+				AvailableLimit: 555,
+			},
+			Transaction: &Transaction{
+				Merchant: "New York Rangers",
+				Amount:   111,
+				Time:     Time(time.Now()),
+			},
+		},
+		Violations: make([]Violation, 0),
+	}
+	tlw1Event = []TimelineEvent{
+		tlFirstEvent,
+	}
+	tlw2Events = []TimelineEvent{
+		tlFirstEvent,
+		tlLastEvent,
 	}
 )
 

@@ -29,8 +29,15 @@ func (t Timeline) Events() []TimelineEvent {
 	return t.events
 }
 
+func (t Timeline) Last() *TimelineEvent {
+	if t.events == nil || len(t.events) <= 0 {
+		return nil
+	}
+
+	return &t.events[len(t.events)-1]
+}
+
 //TODO:
-// - Implement LastEvent method
 // - Implement integration test for the application
 // - Implement acceptance tests for the application
 // - Pass golinter

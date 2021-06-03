@@ -25,7 +25,7 @@ func TestParse(t *testing.T) {
 	}
 }
 
-func TestOutputEvent_String(t *testing.T) {
+func TestTimelineEvent_String(t *testing.T) {
 	cases := []struct {
 		name string
 		in   TimelineEvent

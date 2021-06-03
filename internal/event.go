@@ -55,6 +55,8 @@ func (it *Time) UnmarshalJSON(data []byte) error {
 }
 
 func (te TimelineEvent) String() string {
+	//TODO: extract it to top of the file
+
 	op := Output{
 		OutputAccount: OutputAccount{
 			ActiveCard:     nil,
