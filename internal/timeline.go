@@ -16,21 +16,21 @@ const (
 
 type (
 	Timeline struct {
-		events []OutputEvent
+		events []TimelineEvent
 		timer  Timer
 	}
 )
 
 func NewTimeline() Timeline {
-	return Timeline{events: make([]OutputEvent, 0)}
+	return Timeline{events: make([]TimelineEvent, 0)}
 }
 
-func (t Timeline) Events() []OutputEvent {
+func (t Timeline) Events() []TimelineEvent {
 	return t.events
 }
 
 //TODO:
-// - Implement unmarshal for OutputEvent
+// - Implement unmarshal for TimelineEvent
 // - Implement LastEvent method
 // - Implement integration test for the application
 // - Implement acceptance tests for the application
@@ -58,7 +58,7 @@ func (t *Timeline) init(acc Account) {
 		newAccountState = *initAcc
 	}
 
-	t.events = append(t.events, OutputEvent{
+	t.events = append(t.events, TimelineEvent{
 		Event: Event{
 			Account:     &newAccountState,
 			Transaction: nil,
@@ -76,7 +76,7 @@ func (t *Timeline) add(tr Transaction) {
 	violations := t.validate(tr, availableLimit)
 
 	if len(violations) > 0 {
-		oe := OutputEvent{
+		oe := TimelineEvent{
 			Event: Event{
 				Account:     lastValidAccountState,
 				Transaction: &tr,
@@ -91,7 +91,7 @@ func (t *Timeline) add(tr Transaction) {
 		ActiveCard:     true,
 		AvailableLimit: availableLimit - tr.Amount,
 	}
-	oe := OutputEvent{
+	oe := TimelineEvent{
 		Event: Event{
 			Account:     &newAccountState,
 			Transaction: &tr,
@@ -148,22 +148,22 @@ func (t Timeline) count(filter func(event Event) bool) (count int) {
 }
 
 func (t Timeline) lastInitAcc() *Account {
-	return t.lastAcctByFilter(func(events []OutputEvent, i int) bool {
+	return t.lastAcctByFilter(func(events []TimelineEvent, i int) bool {
 		return events[i].Account != nil
 	})
 }
 
 func (t Timeline) lastActiveAcc() *Account {
-	return t.lastAcctByFilter(func(events []OutputEvent, i int) bool {
-		return events[i].Account != nil && events[i].ActiveCard
+	return t.lastAcctByFilter(func(te []TimelineEvent, i int) bool {
+		return te[i].Account != nil && te[i].ActiveCard
 	})
 }
 
-func (t Timeline) lastAcctByFilter(filter func(events []OutputEvent, i int) bool) *Account {
+func (t Timeline) lastAcctByFilter(filter func(te []TimelineEvent, i int) bool) *Account {
 	if len(t.events) <= 0 {
 		return nil
 	}
-	sortedEvents := make([]OutputEvent, len(t.events))
+	sortedEvents := make([]TimelineEvent, len(t.events))
 	copy(sortedEvents, t.events)
 	sort.Slice(sortedEvents, func(i, j int) bool { return i > j })
 	filterValidEvents := func(j int) bool {

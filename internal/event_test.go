@@ -28,13 +28,13 @@ func TestParse(t *testing.T) {
 func TestOutputEvent_String(t *testing.T) {
 	cases := []struct {
 		name string
-		in   OutputEvent
+		in   TimelineEvent
 		want string
 	}{
-		{"without account", oewoAcc, woAcc},
-		{"with one violation", oew1Vio, w1Vio},
-		{"with two violation", oew2Vio, w2Vio},
-		{"without violation", oewoVio, woVio},
+		{"without account", tewoAcc, woAcc},
+		{"with one violation", tew1Vio, w1Vio},
+		{"with two violation", tew2Vio, w2Vio},
+		{"without violation", tewoVio, woVio},
 	}
 
 	for _, c := range cases {
@@ -66,7 +66,7 @@ var (
 		},
 	}
 
-	oewoAcc = OutputEvent{
+	tewoAcc = TimelineEvent{
 		Event: Event{
 			Account: nil,
 			Transaction: &Transaction{
@@ -79,7 +79,7 @@ var (
 	}
 	woAcc = `{"account":{},"violations":["account-not-initialized"]}`
 
-	oew1Vio = OutputEvent{
+	tew1Vio = TimelineEvent{
 		Event: Event{
 			Account: &Account{
 				ActiveCard:     false,
@@ -91,7 +91,7 @@ var (
 	}
 	w1Vio = `{"account":{"active-card":false,"available-limit":666},"violations":["account-already-initialized"]}`
 
-	oew2Vio = OutputEvent{
+	tew2Vio = TimelineEvent{
 		Event: Event{
 			Account: &Account{
 				ActiveCard:     true,
@@ -110,7 +110,7 @@ var (
 	}
 	w2Vio = `{"account":{"active-card":true,"available-limit":175},"violations":["insufficient-limit","double-transaction"]}`
 
-	oewoVio = OutputEvent{
+	tewoVio = TimelineEvent{
 		Event: Event{
 			Account: &Account{
 				ActiveCard:     true,

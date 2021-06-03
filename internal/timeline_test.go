@@ -10,7 +10,7 @@ func TestTimeline_Process(t *testing.T) {
 	cases := []struct {
 		name string
 		in   []Event
-		want []OutputEvent
+		want []TimelineEvent
 	}{
 		{"successful-initialization", iaInput, iaOutput},
 		{"successful-transaction", sfInput, sfOutput},
@@ -51,7 +51,7 @@ var (
 		Transaction: nil,
 	},
 	}
-	iaOutput = []OutputEvent{{
+	iaOutput = []TimelineEvent{{
 		Event: Event{
 			Account: &Account{
 				ActiveCard:     true,
@@ -86,7 +86,7 @@ var (
 			Transaction: nil,
 		},
 	}
-	aaiOutput = []OutputEvent{{
+	aaiOutput = []TimelineEvent{{
 		Event: Event{
 			Account: nil,
 			Transaction: &Transaction{
@@ -139,7 +139,7 @@ var (
 			},
 		},
 	}
-	sfOutput = []OutputEvent{{
+	sfOutput = []TimelineEvent{{
 		Event: Event{
 			Account: &Account{
 				ActiveCard:     true,
@@ -189,7 +189,7 @@ var (
 			},
 		},
 	}
-	aniOutput = []OutputEvent{
+	aniOutput = []TimelineEvent{
 		{
 			Event: Event{
 				Account: nil,
@@ -248,7 +248,7 @@ var (
 			},
 		},
 	}
-	cnaOutput = []OutputEvent{
+	cnaOutput = []TimelineEvent{
 		{
 			Event: Event{
 				Account: &Account{
@@ -310,7 +310,7 @@ var (
 			},
 		},
 	}
-	ilOutput = []OutputEvent{
+	ilOutput = []TimelineEvent{
 		{
 			Event: Event{
 				Account: &Account{
@@ -412,7 +412,7 @@ var (
 			},
 		},
 	}
-	hfOutput = []OutputEvent{
+	hfOutput = []TimelineEvent{
 		{
 			Event: Event{
 				Account: &Account{
@@ -518,7 +518,7 @@ var (
 			},
 		},
 	}
-	dtOutput = []OutputEvent{
+	dtOutput = []TimelineEvent{
 		{
 			Event: Event{
 				Account: &Account{
@@ -620,7 +620,7 @@ var (
 			},
 		},
 	}
-	stavOutput = []OutputEvent{
+	stavOutput = []TimelineEvent{
 		{
 			Event: Event{
 				Account: &Account{
@@ -738,7 +738,7 @@ var (
 			},
 		},
 	}
-	stadtvOutput = []OutputEvent{
+	stadtvOutput = []TimelineEvent{
 		{
 			Event: Event{
 				Account: &Account{

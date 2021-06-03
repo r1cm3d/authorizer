@@ -25,7 +25,7 @@ type (
 		*Account `json:"account"`
 		*Transaction `json:"transaction"`
 	}
-	OutputEvent struct {
+	TimelineEvent struct {
 		Event
 		Violations []Violation
 	}
@@ -46,7 +46,7 @@ func (it *Time) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (oe OutputEvent) String() string {
+func (te TimelineEvent) String() string {
 	//TODO: extract it to top of the file
 	type Account struct {
 		ActiveCard     *bool `json:"active-card,omitempty"`
@@ -64,13 +64,13 @@ func (oe OutputEvent) String() string {
 		Violations: make([]Violation, 0),
 	}
 
-	if oe.Account != nil {
-		op.ActiveCard = &oe.ActiveCard
-		op.AvailableLimit = &oe.AvailableLimit
+	if te.Account != nil {
+		op.ActiveCard = &te.ActiveCard
+		op.AvailableLimit = &te.AvailableLimit
 	}
 
-	if oe.hasViolation() {
-		op.Violations = oe.Violations
+	if te.hasViolation() {
+		op.Violations = te.Violations
 	}
 
 	str, _ := json.Marshal(op)
@@ -82,6 +82,6 @@ func (e Event) isTransaction() bool {
 	return e.Transaction != nil
 }
 
-func (oe OutputEvent) hasViolation() bool {
-	return len(oe.Violations) > 0
+func (te TimelineEvent) hasViolation() bool {
+	return len(te.Violations) > 0
 }
