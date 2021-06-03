@@ -29,6 +29,17 @@ func (t Timeline) Events() []OutputEvent {
 	return t.events
 }
 
+//TODO:
+// - Implement unmarshal for OutputEvent
+// - Implement LastEvent method
+// - Implement integration test for the application
+// - Implement acceptance tests for the application
+// - Pass golinter
+// - Add documentation
+// - Create docker infrastructure
+// - Improve README
+// - Take a look at documentation one more time and find any overlooked
+
 func (t *Timeline) Process(ie Event) {
 	if !ie.isTransaction() {
 		t.init(*ie.Account)
@@ -40,10 +51,11 @@ func (t *Timeline) Process(ie Event) {
 
 func (t *Timeline) init(acc Account) {
 	violations := make([]Violation, 0)
+
 	newAccountState := acc
-	if len(t.events) > 0 {
+	if initAcc := t.lastInitAcc(); initAcc != nil {
 		violations = append(violations, accountAlreadyInitialized)
-		newAccountState = *t.events[0].Account
+		newAccountState = *initAcc
 	}
 
 	t.events = append(t.events, OutputEvent{

@@ -64,6 +64,14 @@ var (
 
 	aaiInput = []Event{
 		{
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "Boston Bruins",
+				Amount:   666,
+				Time:     Time(now),
+			},
+		},
+		{
 			Account: &Account{
 				ActiveCard:     true,
 				AvailableLimit: 175,
@@ -80,13 +88,26 @@ var (
 	}
 	aaiOutput = []OutputEvent{{
 		Event: Event{
-			Account: &Account{
-				ActiveCard:     true,
-				AvailableLimit: 175,
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "Boston Bruins",
+				Amount:   666,
+				Time:     Time(now),
 			},
-			Transaction: nil,
 		},
-		Violations: make([]Violation, 0)},
+		Violations: []Violation{
+			accountNotInitialized,
+		}},
+		{
+			Event: Event{
+				Account: &Account{
+					ActiveCard:     true,
+					AvailableLimit: 175,
+				},
+				Transaction: nil,
+			},
+			Violations: make([]Violation, 0),
+		},
 		{
 			Event: Event{
 				Account: &Account{
