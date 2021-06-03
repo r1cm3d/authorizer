@@ -15,19 +15,30 @@ const (
 )
 
 type (
+	// Timeline is the kernel of this application. It has all events present into Timeline.
+	// It is NOT thread safe and SHOULD NOT be used in concurrent environments.
 	Timeline struct {
+		// events has the internal state of the Timeline.
+		// All TimelineEvent are keep in this slice.
+		// This property is not thread safe, does not have any synchronization and SHOULD NOT
+		// be used in concurrent environments.
 		events []TimelineEvent
 	}
 )
 
+// NewTimeline creates a new Timeline.
 func NewTimeline() Timeline {
 	return Timeline{events: make([]TimelineEvent, 0)}
 }
 
+// Events returns all TimelineEvent stored in Timeline.
 func (t Timeline) Events() []TimelineEvent {
 	return t.events
 }
 
+// Last returns the last TimelineEvent.
+// This method does not have neither lock strategy nor any kind of synchronization
+// and SHOULD NOT be used in concurrent environments.
 func (t Timeline) Last() *TimelineEvent {
 	if t.events == nil || len(t.events) <= 0 {
 		return nil
@@ -37,13 +48,13 @@ func (t Timeline) Last() *TimelineEvent {
 }
 
 //TODO:
-// - Add documentation
 // - Create docker infrastructure
 // - Implement integration test for the application
 // - Implement acceptance tests for the application
 // - Improve README
 // - Take a look at documentation one more time and find any overlooked
 
+// Process adds an Event into Timeline. It could be either an initialization Event or a Transaction Event.
 func (t *Timeline) Process(ie Event) {
 	if !ie.isTransaction() {
 		t.init(*ie.Account)
@@ -53,36 +64,42 @@ func (t *Timeline) Process(ie Event) {
 	t.add(*ie.Transaction)
 }
 
+// init handles initialization Event. Those Event should not have Transaction, only Account.
+// If an initialization was done before, it will put it into TimelineEvent with an accountAlreadyInitialized violation
+// plus the last valid Account state.
 func (t *Timeline) init(acc Account) {
 	violations := make([]violation, 0)
 
-	newAccountState := acc
-	if initAcc := t.lastInitAcc(); initAcc != nil {
+	newState := acc
+	if initAcc := t.state(); initAcc != nil {
 		violations = append(violations, accountAlreadyInitialized)
-		newAccountState = *initAcc
+		newState = *initAcc
 	}
 
 	t.events = append(t.events, TimelineEvent{
 		Event: Event{
-			Account:     &newAccountState,
+			Account:     &newState,
 			Transaction: nil,
 		},
 		Violations: violations,
 	})
 }
 
+// add handles Transaction Event.
+// It performs a series of validations before put it into TimelineEvent.
+// See README.md for more details.
 func (t *Timeline) add(tr Transaction) {
-	lastValidAccountState := t.lastInitAcc()
+	lastState := t.state()
 	availableLimit := 0
-	if lastValidAccountState != nil {
-		availableLimit = lastValidAccountState.AvailableLimit
+	if lastState != nil {
+		availableLimit = lastState.AvailableLimit
 	}
 	violations := t.validate(tr, availableLimit)
 
 	if len(violations) > 0 {
 		oe := TimelineEvent{
 			Event: Event{
-				Account:     lastValidAccountState,
+				Account:     lastState,
 				Transaction: &tr,
 			},
 			Violations: violations,
@@ -91,13 +108,13 @@ func (t *Timeline) add(tr Transaction) {
 		return
 	}
 
-	newAccountState := Account{
+	newState := Account{
 		ActiveCard:     true,
 		AvailableLimit: availableLimit - tr.Amount,
 	}
 	oe := TimelineEvent{
 		Event: Event{
-			Account:     &newAccountState,
+			Account:     &newState,
 			Transaction: &tr,
 		},
 		Violations: violations,
@@ -105,6 +122,8 @@ func (t *Timeline) add(tr Transaction) {
 	t.events = append(t.events, oe)
 }
 
+// validate performs a series of validations in the Transaction Event.
+// See README.md for more details.
 func (t Timeline) validate(tr Transaction, availableLimit int) []violation {
 	const maxAllowedHF = 3
 	const maxAllowedDT = 1
@@ -118,11 +137,11 @@ func (t Timeline) validate(tr Transaction, availableLimit int) []violation {
 	}
 	violations := make([]violation, 0)
 
-	if lastInitializedAccount := t.lastInitAcc(); lastInitializedAccount == nil {
+	if lastInitializedAccount := t.state(); lastInitializedAccount == nil {
 		return append(violations, accountNotInitialized)
 	}
 
-	if lastCardActive := t.lastActiveAcc(); lastCardActive == nil {
+	if lastCardActive := t.activeState(); lastCardActive == nil {
 		return append(violations, cardNotActive)
 	}
 
@@ -141,6 +160,7 @@ func (t Timeline) validate(tr Transaction, availableLimit int) []violation {
 	return violations
 }
 
+// count returns how many valid Transaction are inside the Timeline according the given function filter.
 func (t Timeline) count(filter func(event Event) bool) (count int) {
 	for _, outputEvent := range t.events {
 		if outputEvent.isTransaction() && !outputEvent.hasViolation() && filter(outputEvent.Event) {
@@ -151,19 +171,25 @@ func (t Timeline) count(filter func(event Event) bool) (count int) {
 	return
 }
 
-func (t Timeline) lastInitAcc() *Account {
-	return t.lastAcctByFilter(func(events []TimelineEvent, i int) bool {
+// state returns the current Account state. It could be either active or inactive.
+func (t Timeline) state() *Account {
+	return t.stateByFilter(func(events []TimelineEvent, i int) bool {
 		return events[i].Account != nil
 	})
 }
 
-func (t Timeline) lastActiveAcc() *Account {
-	return t.lastAcctByFilter(func(te []TimelineEvent, i int) bool {
+
+// activeState returns the last active state.
+func (t Timeline) activeState() *Account {
+	return t.stateByFilter(func(te []TimelineEvent, i int) bool {
 		return te[i].Account != nil && te[i].ActiveCard
 	})
 }
 
-func (t Timeline) lastAcctByFilter(filter func(te []TimelineEvent, i int) bool) *Account {
+// stateByFilter returns a state according a given function filter.
+// It makes a copy of the current timeline, sort its in descending order and returns the first match.
+// It returns nil if no state is found.
+func (t Timeline) stateByFilter(filter func(te []TimelineEvent, i int) bool) *Account {
 	if len(t.events) <= 0 {
 		return nil
 	}
