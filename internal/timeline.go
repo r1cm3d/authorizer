@@ -7,15 +7,14 @@ import (
 
 const (
 	accountAlreadyInitialized = Violation("account-already-initialized")
-	accountNotInitialized = Violation("account-not-initialized")
-	cardNotActive = Violation("card-not-active")
-	insufficientLimit = Violation("insufficient-limit")
-	highFrequency = Violation("high-frequency-small-interval")
-	doubleTransaction = Violation("double-transaction")
+	accountNotInitialized     = Violation("account-not-initialized")
+	cardNotActive             = Violation("card-not-active")
+	insufficientLimit         = Violation("insufficient-limit")
+	highFrequency             = Violation("high-frequency-small-interval")
+	doubleTransaction         = Violation("double-transaction")
 )
 
 type (
-
 	Timeline struct {
 		events []OutputEvent
 		timer  Timer
@@ -31,7 +30,7 @@ func (t Timeline) Events() []OutputEvent {
 }
 
 func (t *Timeline) Process(ie Event) {
-	if ie.isInitEvent() {
+	if !ie.isTransaction() {
 		t.init(*ie.Account)
 		return
 	}
@@ -126,21 +125,15 @@ func (t Timeline) validate(tr Transaction, availableLimit int) []Violation {
 	return violations
 }
 
-func (t Timeline) count(filter func(event Event) bool) (count int){
-	for _, event := range t.events {
-		// TODO: These two checks could be event methods
-		if event.Transaction == nil || len(event.Violations) > 0 {
-			continue
-		}
-
-		if filter(event.Event) {
+func (t Timeline) count(filter func(event Event) bool) (count int) {
+	for _, outputEvent := range t.events {
+		if outputEvent.isTransaction() && !outputEvent.hasViolation() && filter(outputEvent.Event) {
 			count++
 		}
 	}
 
 	return
 }
-
 
 func (t Timeline) lastInitAcc() *Account {
 	return t.lastAcctByFilter(func(events []OutputEvent, i int) bool {
@@ -160,7 +153,7 @@ func (t Timeline) lastAcctByFilter(filter func(events []OutputEvent, i int) bool
 	}
 	sortedEvents := make([]OutputEvent, len(t.events))
 	copy(sortedEvents, t.events)
-	sort.Slice(sortedEvents, func(i, j int) bool { return i > j	})
+	sort.Slice(sortedEvents, func(i, j int) bool { return i > j })
 	noViolPred := func(j int) bool {
 		return filter(sortedEvents, j) && len(sortedEvents[j].Violations) == 0
 	}
@@ -175,8 +168,4 @@ func (t Timeline) lastAcctByFilter(filter func(events []OutputEvent, i int) bool
 		return nil
 	}
 	return sortedEvents[i].Account
-}
-
-func (e Event) isInitEvent() bool {
-	return e.Account != nil
 }

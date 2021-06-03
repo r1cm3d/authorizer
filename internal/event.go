@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"strings"
 	"time"
 )
 
@@ -30,12 +29,13 @@ type (
 	}
 )
 
-func (it *Time) UnmarshalJSON(data []byte) error {
-	s := strings.Trim(string(data), `"`)
-	t, _ := time.Parse(time.RFC3339, s)
-
-	*it = Time(t)
-	return nil
+func (e Event) isTransaction() bool {
+	return e.Transaction != nil
 }
+
+func (e OutputEvent) hasViolation() bool {
+	return len(e.Violations) > 0
+}
+
 
 
