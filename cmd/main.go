@@ -7,6 +7,8 @@ import (
 	"os"
 )
 
+// Example
+// ./authorize < data/successful_transaction
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	timeline := internal.NewTimeline()
