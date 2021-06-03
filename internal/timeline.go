@@ -154,14 +154,13 @@ func (t Timeline) lastAcctByFilter(filter func(events []OutputEvent, i int) bool
 	sortedEvents := make([]OutputEvent, len(t.events))
 	copy(sortedEvents, t.events)
 	sort.Slice(sortedEvents, func(i, j int) bool { return i > j })
-	noViolPred := func(j int) bool {
-		return filter(sortedEvents, j) && len(sortedEvents[j].Violations) == 0
+	filterValidEvents := func(j int) bool {
+		return filter(sortedEvents, j) && !sortedEvents[j].hasViolation()
 	}
 
-	// TODO: change this weird name noViolPred
 	i := 0
-	if !noViolPred(0) {
-		i = sort.Search(len(sortedEvents), noViolPred)
+	if !filterValidEvents(0) {
+		i = sort.Search(len(sortedEvents), filterValidEvents)
 	}
 
 	if i == len(sortedEvents) {
