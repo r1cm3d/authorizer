@@ -13,13 +13,13 @@ func TestTimeline_Process(t *testing.T) {
 		want []TimelineEvent
 	}{
 		{"successful-initialization", iaInput, iaOutput},
-		{"successful-transaction", sfInput, sfOutput},
-		{"account-already-initialized", aaiInput, aaiOutput},
-		{"account-not-initialized", aniInput, aniOutput},
+		{"successful-Transaction", sfInput, sfOutput},
+		{"Account-already-initialized", aaiInput, aaiOutput},
+		{"Account-not-initialized", aniInput, aniOutput},
 		{"card-not-active", cnaInput, cnaOutput},
 		{"insufficient-limit", ilInput, ilOutput},
 		{"high-frequency-small-interval", hfInput, hfOutput},
-		{"double-transaction", dtInput, dtOutput},
+		{"double-Transaction", dtInput, dtOutput},
 		{"successful-transactions-after-hf-violation", stavInput, stavOutput},
 		{"successful-transactions-after-dt-violation", stadtvInput, stadtvOutput},
 	}
@@ -46,8 +46,8 @@ func TestTimeline_Last(t *testing.T) {
 		want *TimelineEvent
 	}{
 		{"with nil timeline", nil, nil},
-		{"without any event", make([]TimelineEvent, 0), nil},
-		{"with one event", tlw1Event, &tlFirstEvent},
+		{"without any Event", make([]TimelineEvent, 0), nil},
+		{"with one Event", tlw1Event, &tlFirstEvent},
 		{"with more than one", tlw2Events, &tlLastEvent},
 	}
 
@@ -82,7 +82,7 @@ var (
 			},
 			Transaction: nil,
 		},
-		Violations: make([]Violation, 0),
+		Violations: make([]violation, 0),
 	}}
 
 	aaiInput = []Event{
@@ -91,7 +91,7 @@ var (
 			Transaction: &Transaction{
 				Merchant: "Boston Bruins",
 				Amount:   666,
-				Time:     Time(now),
+				Time:     datetime(now),
 			},
 		},
 		{
@@ -115,10 +115,10 @@ var (
 			Transaction: &Transaction{
 				Merchant: "Boston Bruins",
 				Amount:   666,
-				Time:     Time(now),
+				Time:     datetime(now),
 			},
 		},
-		Violations: []Violation{
+		Violations: []violation{
 			accountNotInitialized,
 		}},
 		{
@@ -129,7 +129,7 @@ var (
 				},
 				Transaction: nil,
 			},
-			Violations: make([]Violation, 0),
+			Violations: make([]violation, 0),
 		},
 		{
 			Event: Event{
@@ -139,12 +139,12 @@ var (
 				},
 				Transaction: nil,
 			},
-			Violations: []Violation{
+			Violations: []violation{
 				accountAlreadyInitialized,
 			}},
 	}
 
-	trTime  = Time(time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC))
+	trTime  = datetime(time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC))
 	sfInput = []Event{
 		{
 			Account: &Account{
@@ -170,7 +170,7 @@ var (
 			},
 			Transaction: nil,
 		},
-		Violations: make([]Violation, 0)},
+		Violations: make([]violation, 0)},
 		{
 			Event: Event{
 				Account: &Account{
@@ -183,7 +183,7 @@ var (
 					Time:     trTime,
 				},
 			},
-			Violations: make([]Violation, 0)},
+			Violations: make([]violation, 0)},
 	}
 
 	aniInput = []Event{
@@ -222,7 +222,7 @@ var (
 					Time:     trTime,
 				},
 			},
-			Violations: []Violation{
+			Violations: []violation{
 				accountNotInitialized,
 			},
 		},
@@ -235,7 +235,7 @@ var (
 					Time:     trTime,
 				},
 			},
-			Violations: []Violation{
+			Violations: []violation{
 				accountNotInitialized,
 			},
 		},
@@ -248,7 +248,7 @@ var (
 					Time:     trTime,
 				},
 			},
-			Violations: []Violation{
+			Violations: []violation{
 				accountNotInitialized,
 			},
 		},
@@ -280,7 +280,7 @@ var (
 				},
 				Transaction: nil,
 			},
-			Violations: make([]Violation, 0),
+			Violations: make([]violation, 0),
 		},
 		{
 			Event: Event{
@@ -294,7 +294,7 @@ var (
 					Time:     trTime,
 				},
 			},
-			Violations: []Violation{
+			Violations: []violation{
 				cardNotActive,
 			},
 		},
@@ -342,7 +342,7 @@ var (
 				},
 				Transaction: nil,
 			},
-			Violations: make([]Violation, 0),
+			Violations: make([]violation, 0),
 		},
 		{
 			Event: Event{
@@ -356,7 +356,7 @@ var (
 					Time:     trTime,
 				},
 			},
-			Violations: []Violation{
+			Violations: []violation{
 				insufficientLimit,
 			},
 		},
@@ -372,7 +372,7 @@ var (
 					Time:     trTime,
 				},
 			},
-			Violations: make([]Violation, 0),
+			Violations: make([]violation, 0),
 		},
 		{
 			Event: Event{
@@ -386,14 +386,14 @@ var (
 					Time:     trTime,
 				},
 			},
-			Violations: []Violation{
+			Violations: []violation{
 				insufficientLimit,
 			},
 		},
 	}
 
-	hfTime  = Time(time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC))
-	hfTime2 = Time(time.Date(2019, time.February, 13, 11, 1, 0, 0, time.UTC))
+	hfTime  = datetime(time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC))
+	hfTime2 = datetime(time.Date(2019, time.February, 13, 11, 1, 0, 0, time.UTC))
 	hfInput = []Event{
 		{
 			Account: &Account{
@@ -444,7 +444,7 @@ var (
 				},
 				Transaction: nil,
 			},
-			Violations: make([]Violation, 0),
+			Violations: make([]violation, 0),
 		},
 		{
 			Event: Event{
@@ -458,7 +458,7 @@ var (
 					Time:     hfTime,
 				},
 			},
-			Violations: make([]Violation, 0),
+			Violations: make([]violation, 0),
 		},
 		{
 			Event: Event{
@@ -472,7 +472,7 @@ var (
 					Time:     hfTime,
 				},
 			},
-			Violations: make([]Violation, 0),
+			Violations: make([]violation, 0),
 		},
 		{
 			Event: Event{
@@ -486,7 +486,7 @@ var (
 					Time:     hfTime2,
 				},
 			},
-			Violations: make([]Violation, 0),
+			Violations: make([]violation, 0),
 		},
 		{
 			Event: Event{
@@ -500,14 +500,14 @@ var (
 					Time:     hfTime2,
 				},
 			},
-			Violations: []Violation{
+			Violations: []violation{
 				highFrequency,
 			},
 		},
 	}
 
-	dtTime  = Time(time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC))
-	dtTime2 = Time(time.Date(2019, time.February, 13, 11, 1, 0, 0, time.UTC))
+	dtTime  = datetime(time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC))
+	dtTime2 = datetime(time.Date(2019, time.February, 13, 11, 1, 0, 0, time.UTC))
 	dtInput = []Event{
 		{
 			Account: &Account{
@@ -550,7 +550,7 @@ var (
 				},
 				Transaction: nil,
 			},
-			Violations: make([]Violation, 0),
+			Violations: make([]violation, 0),
 		},
 		{
 			Event: Event{
@@ -564,7 +564,7 @@ var (
 					Time:     dtTime,
 				},
 			},
-			Violations: make([]Violation, 0),
+			Violations: make([]violation, 0),
 		},
 		{
 			Event: Event{
@@ -578,7 +578,7 @@ var (
 					Time:     dtTime,
 				},
 			},
-			Violations: make([]Violation, 0),
+			Violations: make([]violation, 0),
 		},
 		{
 			Event: Event{
@@ -592,16 +592,16 @@ var (
 					Time:     dtTime2,
 				},
 			},
-			Violations: []Violation{
+			Violations: []violation{
 				doubleTransaction,
 			},
 		},
 	}
 
-	stavTime  = Time(time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC))
-	stavTime2 = Time(time.Date(2019, time.February, 13, 11, 0, 1, 0, time.UTC))
-	stavTime3 = Time(time.Date(2019, time.February, 13, 11, 1, 1, 0, time.UTC))
-	stavTime4 = Time(time.Date(2019, time.February, 13, 11, 1, 31, 0, time.UTC))
+	stavTime  = datetime(time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC))
+	stavTime2 = datetime(time.Date(2019, time.February, 13, 11, 0, 1, 0, time.UTC))
+	stavTime3 = datetime(time.Date(2019, time.February, 13, 11, 1, 1, 0, time.UTC))
+	stavTime4 = datetime(time.Date(2019, time.February, 13, 11, 1, 31, 0, time.UTC))
 	stavInput = []Event{
 		{
 			Account: &Account{
@@ -652,7 +652,7 @@ var (
 				},
 				Transaction: nil,
 			},
-			Violations: make([]Violation, 0),
+			Violations: make([]violation, 0),
 		},
 		{
 			Event: Event{
@@ -666,7 +666,7 @@ var (
 					Time:     stavTime,
 				},
 			},
-			Violations: []Violation{
+			Violations: []violation{
 				insufficientLimit,
 			},
 		},
@@ -682,7 +682,7 @@ var (
 					Time:     stavTime2,
 				},
 			},
-			Violations: []Violation{
+			Violations: []violation{
 				insufficientLimit,
 			},
 		},
@@ -698,7 +698,7 @@ var (
 					Time:     stavTime3,
 				},
 			},
-			Violations: make([]Violation, 0),
+			Violations: make([]violation, 0),
 		},
 		{
 			Event: Event{
@@ -712,14 +712,14 @@ var (
 					Time:     stavTime4,
 				},
 			},
-			Violations: make([]Violation, 0),
+			Violations: make([]violation, 0),
 		},
 	}
 
-	stadtvTime  = Time(time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC))
-	stadtvTime2 = Time(time.Date(2019, time.February, 13, 11, 0, 1, 0, time.UTC))
-	stadtvTime3 = Time(time.Date(2019, time.February, 13, 11, 1, 1, 0, time.UTC))
-	stadtvTime4 = Time(time.Date(2019, time.February, 13, 11, 1, 31, 0, time.UTC))
+	stadtvTime  = datetime(time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC))
+	stadtvTime2 = datetime(time.Date(2019, time.February, 13, 11, 0, 1, 0, time.UTC))
+	stadtvTime3 = datetime(time.Date(2019, time.February, 13, 11, 1, 1, 0, time.UTC))
+	stadtvTime4 = datetime(time.Date(2019, time.February, 13, 11, 1, 31, 0, time.UTC))
 	stadtvInput = []Event{
 		{
 			Account: &Account{
@@ -770,7 +770,7 @@ var (
 				},
 				Transaction: nil,
 			},
-			Violations: make([]Violation, 0),
+			Violations: make([]violation, 0),
 		},
 		{
 			Event: Event{
@@ -784,7 +784,7 @@ var (
 					Time:     stavTime,
 				},
 			},
-			Violations: []Violation{
+			Violations: []violation{
 				insufficientLimit,
 			},
 		},
@@ -800,7 +800,7 @@ var (
 					Time:     stavTime2,
 				},
 			},
-			Violations: []Violation{
+			Violations: []violation{
 				insufficientLimit,
 			},
 		},
@@ -816,7 +816,7 @@ var (
 					Time:     stavTime3,
 				},
 			},
-			Violations: make([]Violation, 0),
+			Violations: make([]violation, 0),
 		},
 		{
 			Event: Event{
@@ -830,7 +830,7 @@ var (
 					Time:     stavTime4,
 				},
 			},
-			Violations: make([]Violation, 0),
+			Violations: make([]violation, 0),
 		},
 	}
 
@@ -842,7 +842,7 @@ var (
 			},
 			Transaction: nil,
 		},
-		Violations: make([]Violation, 0),
+		Violations: make([]violation, 0),
 	}
 	tlLastEvent = TimelineEvent{
 		Event: Event{
@@ -853,10 +853,10 @@ var (
 			Transaction: &Transaction{
 				Merchant: "New York Rangers",
 				Amount:   111,
-				Time:     Time(time.Now()),
+				Time:     datetime(time.Now()),
 			},
 		},
-		Violations: make([]Violation, 0),
+		Violations: make([]violation, 0),
 	}
 	tlw1Event = []TimelineEvent{
 		tlFirstEvent,

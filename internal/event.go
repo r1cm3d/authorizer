@@ -7,32 +7,33 @@ import (
 )
 
 type (
-	Time  time.Time
-	Violation string
 	Account   struct {
 		ActiveCard     bool `json:"active-card"`
 		AvailableLimit int  `json:"available-limit"`
 	}
 	Transaction struct {
-		Merchant string `json:"merchant"`
-		Amount   int    `json:"amount"`
-		Time     Time   `json:"time"`
+		Merchant string   `json:"merchant"`
+		Amount   int      `json:"amount"`
+		Time     datetime `json:"time"`
 	}
 	Event struct {
-		*Account     `json:"account"`
-		*Transaction `json:"transaction"`
+		*Account     `json:"Account"`
+		*Transaction `json:"Transaction"`
 	}
 	TimelineEvent struct {
 		Event
-		Violations []Violation
+		Violations []violation
 	}
-	OutputAccount struct {
+
+	datetime      time.Time
+	violation     string
+	outputAccount struct {
 		ActiveCard     *bool `json:"active-card,omitempty"`
 		AvailableLimit *int  `json:"available-limit,omitempty"`
 	}
-	Output struct {
-		OutputAccount `json:"account"`
-		Violations []Violation   `json:"violations"`
+	output struct {
+		outputAccount `json:"Account"`
+		Violations    []violation `json:"violations"`
 	}
 )
 
@@ -43,23 +44,21 @@ func Parse(input string) Event {
 	return ie
 }
 
-func (it *Time) UnmarshalJSON(data []byte) error {
+func (it *datetime) UnmarshalJSON(data []byte) error {
 	s := strings.Trim(string(data), `"`)
 	t, _ := time.Parse(time.RFC3339, s)
 
-	*it = Time(t)
+	*it = datetime(t)
 	return nil
 }
 
 func (te TimelineEvent) String() string {
-	//TODO: extract it to top of the file
-
-	op := Output{
-		OutputAccount: OutputAccount{
+	op := output{
+		outputAccount: outputAccount{
 			ActiveCard:     nil,
 			AvailableLimit: nil,
 		},
-		Violations: make([]Violation, 0),
+		Violations: make([]violation, 0),
 	}
 
 	if te.Account != nil {

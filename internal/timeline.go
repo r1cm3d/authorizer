@@ -6,12 +6,12 @@ import (
 )
 
 const (
-	accountAlreadyInitialized = Violation("account-already-initialized")
-	accountNotInitialized     = Violation("account-not-initialized")
-	cardNotActive             = Violation("card-not-active")
-	insufficientLimit         = Violation("insufficient-limit")
-	highFrequency             = Violation("high-frequency-small-interval")
-	doubleTransaction         = Violation("double-transaction")
+	accountAlreadyInitialized = violation("Account-already-initialized")
+	accountNotInitialized     = violation("Account-not-initialized")
+	cardNotActive             = violation("card-not-active")
+	insufficientLimit         = violation("insufficient-limit")
+	highFrequency             = violation("high-frequency-small-interval")
+	doubleTransaction         = violation("double-Transaction")
 )
 
 type (
@@ -37,11 +37,10 @@ func (t Timeline) Last() *TimelineEvent {
 }
 
 //TODO:
-// - Implement integration test for the application
-// - Implement acceptance tests for the application
-// - Pass golinter
 // - Add documentation
 // - Create docker infrastructure
+// - Implement integration test for the application
+// - Implement acceptance tests for the application
 // - Improve README
 // - Take a look at documentation one more time and find any overlooked
 
@@ -54,12 +53,8 @@ func (t *Timeline) Process(ie Event) {
 	t.add(*ie.Transaction)
 }
 
-func (t Timeline) Now() time.Time {
-	return time.Now()
-}
-
 func (t *Timeline) init(acc Account) {
-	violations := make([]Violation, 0)
+	violations := make([]violation, 0)
 
 	newAccountState := acc
 	if initAcc := t.lastInitAcc(); initAcc != nil {
@@ -110,7 +105,7 @@ func (t *Timeline) add(tr Transaction) {
 	t.events = append(t.events, oe)
 }
 
-func (t Timeline) validate(tr Transaction, availableLimit int) []Violation {
+func (t Timeline) validate(tr Transaction, availableLimit int) []violation {
 	const maxAllowedHF = 3
 	const maxAllowedDT = 1
 	const minIntervalAllowed = 2
@@ -121,7 +116,7 @@ func (t Timeline) validate(tr Transaction, availableLimit int) []Violation {
 	betweenFilterSameMerchant := func(e Event) bool {
 		return betweenFilter(e) && e.Merchant == tr.Merchant
 	}
-	violations := make([]Violation, 0)
+	violations := make([]violation, 0)
 
 	if lastInitializedAccount := t.lastInitAcc(); lastInitializedAccount == nil {
 		return append(violations, accountNotInitialized)
