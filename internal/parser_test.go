@@ -25,23 +25,100 @@ func TestParse(t *testing.T) {
 	}
 }
 
+func TestOutputEvent_String(t *testing.T) {
+	cases := []struct {
+		name string
+		in   OutputEvent
+		want string
+	}{
+		{"without account", oewoAcc, woAcc},
+		{"with one violation", oew1Vio, w1Vio},
+		{"with two violation", oew2Vio, w2Vio},
+		{"without violation", oewoVio, woVio},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if got := c.in.String(); got != c.want {
+				t.Errorf("%s, want: %s, got: %s", c.name, c.want, got)
+			}
+		})
+	}
+}
+
 var (
-	accJson  = `{"account": {"active-card": true, "available-limit": 666}}`
+	accJson  = `{"account":{"active-card":true,"available-limit":666}}`
 	accEvent = Event{
+		Account: &Account{
+			ActiveCard:     true,
+			AvailableLimit: 666,
+		},
+		Transaction: nil,
+	}
+
+	trJson  = `{"transaction":{"merchant":"Montreal Canadiens","amount":666,"time":"2019-02-13T11:00:00.000Z"}}`
+	trEvent = Event{
+		Account: nil,
+		Transaction: &Transaction{
+			Merchant: "Montreal Canadiens",
+			Amount:   666,
+			Time:     Time(time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC)),
+		},
+	}
+
+	oewoAcc = OutputEvent{
+		Event: Event{
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "Vegas Golden Knights",
+				Amount:   142,
+				Time:     Time(time.Now()),
+			},
+		},
+		Violations: []Violation{accountNotInitialized},
+	}
+	woAcc = `{"account":{},"violations":["account-not-initialized"]}`
+
+	oew1Vio = OutputEvent{
+		Event: Event{
+			Account: &Account{
+				ActiveCard:     false,
+				AvailableLimit: 666,
+			},
+			Transaction: nil,
+		},
+		Violations: []Violation{accountAlreadyInitialized},
+	}
+	w1Vio = `{"account":{"active-card":false,"available-limit":666},"violations":["account-already-initialized"]}`
+
+	oew2Vio = OutputEvent{
+		Event: Event{
+			Account: &Account{
+				ActiveCard:     true,
+				AvailableLimit: 175,
+			},
+			Transaction: &Transaction{
+				Merchant: "Pittsburgh Penguins",
+				Amount:   175,
+				Time:     Time(time.Now()),
+			},
+		},
+		Violations: []Violation{
+			insufficientLimit,
+			doubleTransaction,
+		},
+	}
+	w2Vio = `{"account":{"active-card":true,"available-limit":175},"violations":["insufficient-limit","double-transaction"]}`
+
+	oewoVio = OutputEvent{
+		Event: Event{
 			Account: &Account{
 				ActiveCard:     true,
 				AvailableLimit: 666,
 			},
 			Transaction: nil,
+		},
+		Violations: make([]Violation, 0),
 	}
-
-	trJson  = `{"transaction": {"merchant": "Montreal Canadiens", "amount": 666, "time": "2019-02-13T11:00:00.000Z"}}`
-	trEvent = Event{
-			Account: nil,
-			Transaction: &Transaction{
-				Merchant: "Montreal Canadiens",
-				Amount:   666,
-				Time: Time(time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC)),
-			},
-	}
+	woVio = `{"account":{"active-card":true,"available-limit":666},"violations":[]}`
 )

@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"encoding/json"
 	"time"
 )
 
@@ -11,8 +12,8 @@ type (
 	}
 	Violation string
 	Account   struct {
-		ActiveCard     bool `json:"active-card"`
-		AvailableLimit int `json:"available-limit"`
+		ActiveCard     bool `json:"active-card,omitempty"`
+		AvailableLimit int `json:"available-limit,omitempty"`
 	}
 	Transaction struct {
 		Merchant string `json:"merchant"`
@@ -33,8 +34,40 @@ func (e Event) isTransaction() bool {
 	return e.Transaction != nil
 }
 
-func (e OutputEvent) hasViolation() bool {
-	return len(e.Violations) > 0
+func (oe OutputEvent) hasViolation() bool {
+	return len(oe.Violations) > 0
+}
+
+func (oe OutputEvent) String() string {
+	//TODO: extract it to top of the file
+	type Account struct {
+		ActiveCard     *bool `json:"active-card,omitempty"`
+		AvailableLimit *int `json:"available-limit,omitempty"`
+	}
+	type output struct {
+		Account `json:"account"`
+		Violations []Violation `json:"violations"`
+	}
+	op := output{
+		Account:   Account{
+			ActiveCard:     nil,
+			AvailableLimit: nil,
+		},
+		Violations: make([]Violation, 0),
+	}
+
+	if oe.Account != nil {
+		op.ActiveCard = &oe.ActiveCard
+		op.AvailableLimit = &oe.AvailableLimit
+	}
+
+	if oe.hasViolation() {
+		op.Violations = oe.Violations
+	}
+
+	str, _ := json.Marshal(op)
+
+	return string(str)
 }
 
 
