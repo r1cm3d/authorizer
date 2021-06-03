@@ -8,9 +8,6 @@ import (
 
 type (
 	Time  time.Time
-	Timer interface {
-		Now() time.Time
-	}
 	Violation string
 	Account   struct {
 		ActiveCard     bool `json:"active-card"`

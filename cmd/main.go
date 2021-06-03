@@ -3,17 +3,18 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/r1cm3d/authorizer/internal"
 	"os"
 )
 
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
-	i := 0
+	timeline := internal.NewTimeline()
+	fmt.Println()
 	for scanner.Scan() {
-		//TODO: call parser here
-		fmt.Printf("\nLine: %d\n%s", i, scanner.Text())
-		i++
+		event := internal.Parse(scanner.Text())
+		timeline.Process(event)
+		fmt.Println(timeline.Last())
 	}
-
-	fmt.Printf("\n\n\nEnd of file")
+	fmt.Println()
 }

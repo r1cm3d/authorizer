@@ -27,7 +27,6 @@ func TestTimeline_Process(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			timeline := NewTimeline()
-			timeline.timer = mockTimer{}
 
 			for _, ie := range c.in {
 				timeline.Process(ie)
@@ -56,7 +55,6 @@ func TestTimeline_Last(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			tl := Timeline{
 				events: c.in,
-				timer:  nil,
 			}
 			if got := tl.Last(); !reflect.DeepEqual(c.want, got) {
 				t.Errorf("%s, want: %s, got: %s", c.name, c.want, got)
@@ -868,9 +866,3 @@ var (
 		tlLastEvent,
 	}
 )
-
-type mockTimer struct{}
-
-func (m mockTimer) Now() time.Time {
-	return now
-}

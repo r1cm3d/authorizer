@@ -17,7 +17,6 @@ const (
 type (
 	Timeline struct {
 		events []TimelineEvent
-		timer  Timer
 	}
 )
 
@@ -53,6 +52,10 @@ func (t *Timeline) Process(ie Event) {
 	}
 
 	t.add(*ie.Transaction)
+}
+
+func (t Timeline) Now() time.Time {
+	return time.Now()
 }
 
 func (t *Timeline) init(acc Account) {

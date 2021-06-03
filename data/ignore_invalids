@@ -1,0 +1,5 @@
+{"account": {"active-card": true, "available-limit": 1000}}
+{"transaction": {"merchant": "Miami Dolphins", "amount": 1250, "time": "2019-02-13T11:00:00.000Z"}}
+{"transaction": {"merchant": "Kansas City Chiefs", "amount": 2500, "time": "2019-02-13T11:00:01.000Z"}}
+{"transaction": {"merchant": "Tampa Bay Buccaneers", "amount": 800, "time": "2019-02-13T11:01:01.000Z"}}
+{"transaction": {"merchant": "Detroit Lions", "amount": 80, "time": "2019-02-13T11:01:31.000Z"}}
