@@ -9,7 +9,7 @@ import (
 func TestTimeline_Process(t *testing.T) {
 	cases := []struct {
 		name string
-		in   []InputEvent
+		in   []Event
 		want []OutputEvent
 	}{
 		{"successful-initialization", iaInput, iaOutput},
@@ -41,17 +41,16 @@ func TestTimeline_Process(t *testing.T) {
 }
 
 var (
-	now                    = time.Now()
+	now = time.Now()
 
-	iaInput = []InputEvent{{
-		Event{
-			Account: &Account{
-				ActiveCard:     true,
-				AvailableLimit: 750,
-			},
-			Transaction: nil,
+	iaInput = []Event{{
+		Account: &Account{
+			ActiveCard:     true,
+			AvailableLimit: 750,
 		},
-	}}
+		Transaction: nil,
+	},
+	}
 	iaOutput = []OutputEvent{{
 		Event: Event{
 			Account: &Account{
@@ -63,24 +62,20 @@ var (
 		Violations: make([]Violation, 0),
 	}}
 
-	aaiInput = []InputEvent{
+	aaiInput = []Event{
 		{
-			Event: Event{
-				Account: &Account{
-					ActiveCard:     true,
-					AvailableLimit: 175,
-				},
-				Transaction: nil,
+			Account: &Account{
+				ActiveCard:     true,
+				AvailableLimit: 175,
 			},
+			Transaction: nil,
 		},
 		{
-			Event: Event{
-				Account: &Account{
-					ActiveCard:     true,
-					AvailableLimit: 350,
-				},
-				Transaction: nil,
+			Account: &Account{
+				ActiveCard:     true,
+				AvailableLimit: 350,
 			},
+			Transaction: nil,
 		},
 	}
 	aaiOutput = []OutputEvent{{
@@ -105,25 +100,21 @@ var (
 			}},
 	}
 
-	trTime  = time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC)
-	sfInput = []InputEvent{
+	trTime  = Time(time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC))
+	sfInput = []Event{
 		{
-			Event: Event{
-				Account: &Account{
-					ActiveCard:     true,
-					AvailableLimit: 100,
-				},
-				Transaction: nil,
+			Account: &Account{
+				ActiveCard:     true,
+				AvailableLimit: 100,
 			},
+			Transaction: nil,
 		},
 		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "New York Yankees",
-					Amount:   20,
-					Time:     trTime,
-				},
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "New York Yankees",
+				Amount:   20,
+				Time:     trTime,
 			},
 		},
 	}
@@ -151,35 +142,29 @@ var (
 			Violations: make([]Violation, 0)},
 	}
 
-	aniInput = []InputEvent{
+	aniInput = []Event{
 		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "San Francisco Giants",
-					Amount:   36,
-					Time:     trTime,
-				},
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "San Francisco Giants",
+				Amount:   36,
+				Time:     trTime,
 			},
 		},
 		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "Tampa Bay Rays",
-					Amount:   20,
-					Time:     trTime,
-				},
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "Tampa Bay Rays",
+				Amount:   20,
+				Time:     trTime,
 			},
 		},
 		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "San Diego Padres",
-					Amount:   15,
-					Time:     trTime,
-				},
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "San Diego Padres",
+				Amount:   15,
+				Time:     trTime,
 			},
 		},
 	}
@@ -225,24 +210,20 @@ var (
 		},
 	}
 
-	cnaInput = []InputEvent{
+	cnaInput = []Event{
 		{
-			Event: Event{
-				Account: &Account{
-					ActiveCard:     false,
-					AvailableLimit: 100,
-				},
-				Transaction: nil,
+			Account: &Account{
+				ActiveCard:     false,
+				AvailableLimit: 100,
 			},
+			Transaction: nil,
 		},
 		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "New York Yankees",
-					Amount:   20,
-					Time:     trTime,
-				},
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "New York Yankees",
+				Amount:   20,
+				Time:     trTime,
 			},
 		},
 	}
@@ -275,44 +256,36 @@ var (
 		},
 	}
 
-	ilInput = []InputEvent{
+	ilInput = []Event{
 		{
-			Event: Event{
-				Account: &Account{
-					ActiveCard:     true,
-					AvailableLimit: 100,
-				},
-				Transaction: nil,
+			Account: &Account{
+				ActiveCard:     true,
+				AvailableLimit: 100,
+			},
+			Transaction: nil,
+		},
+		{
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "Pittsburgh Pirates",
+				Amount:   101,
+				Time:     trTime,
 			},
 		},
 		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "Pittsburgh Pirates",
-					Amount:   101,
-					Time:     trTime,
-				},
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "Chicago White Sox",
+				Amount:   98,
+				Time:     trTime,
 			},
 		},
 		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "Chicago White Sox",
-					Amount:   98,
-					Time:     trTime,
-				},
-			},
-		},
-		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "St. Louis Cardinals",
-					Amount:   5,
-					Time:     trTime,
-				},
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "St. Louis Cardinals",
+				Amount:   5,
+				Time:     trTime,
 			},
 		},
 	}
@@ -375,56 +348,46 @@ var (
 		},
 	}
 
-	hfTime                     = time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC)
-	hfTime2                    = time.Date(2019, time.February, 13, 11, 1, 0, 0, time.UTC)
-	hfInput = []InputEvent{
+	hfTime  = Time(time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC))
+	hfTime2 = Time(time.Date(2019, time.February, 13, 11, 1, 0, 0, time.UTC))
+	hfInput = []Event{
 		{
-			Event: Event{
-				Account: &Account{
-					ActiveCard:     true,
-					AvailableLimit: 100,
-				},
-				Transaction: nil,
+			Account: &Account{
+				ActiveCard:     true,
+				AvailableLimit: 100,
+			},
+			Transaction: nil,
+		},
+		{
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "Atlanta Braves",
+				Amount:   10,
+				Time:     hfTime,
 			},
 		},
 		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "Atlanta Braves",
-					Amount:   10,
-					Time:     hfTime,
-				},
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "New York Mets",
+				Amount:   11,
+				Time:     hfTime,
 			},
 		},
 		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "New York Mets",
-					Amount:   11,
-					Time:     hfTime,
-				},
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "Los Angeles Dodgers",
+				Amount:   12,
+				Time:     hfTime2,
 			},
 		},
 		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "Los Angeles Dodgers",
-					Amount:   12,
-					Time:     hfTime2,
-				},
-			},
-		},
-		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "Boston Red Sox",
-					Amount:   16,
-					Time:     hfTime2,
-				},
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "Boston Red Sox",
+				Amount:   16,
+				Time:     hfTime2,
 			},
 		},
 	}
@@ -499,47 +462,38 @@ var (
 		},
 	}
 
-
-	dtTime                     = time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC)
-	dtTime2                    = time.Date(2019, time.February, 13, 11, 1, 0, 0, time.UTC)
-	dtInput = []InputEvent{
+	dtTime  = Time(time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC))
+	dtTime2 = Time(time.Date(2019, time.February, 13, 11, 1, 0, 0, time.UTC))
+	dtInput = []Event{
 		{
-			Event: Event{
-				Account: &Account{
-					ActiveCard:     true,
-					AvailableLimit: 100,
-				},
-				Transaction: nil,
+			Account: &Account{
+				ActiveCard:     true,
+				AvailableLimit: 100,
+			},
+			Transaction: nil,
+		},
+		{
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "Toronto Blue Jays",
+				Amount:   10,
+				Time:     dtTime,
 			},
 		},
 		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "Toronto Blue Jays",
-					Amount:   10,
-					Time:     dtTime,
-				},
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "Los Angeles Angels",
+				Amount:   11,
+				Time:     dtTime,
 			},
 		},
 		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "Los Angeles Angels",
-					Amount:   11,
-					Time:     dtTime,
-				},
-			},
-		},
-		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "Los Angeles Angels",
-					Amount:   12,
-					Time:     dtTime2,
-				},
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "Los Angeles Angels",
+				Amount:   12,
+				Time:     dtTime2,
 			},
 		},
 	}
@@ -600,58 +554,48 @@ var (
 		},
 	}
 
-	stavTime                     = time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC)
-	stavTime2                    = time.Date(2019, time.February, 13, 11, 0, 1, 0, time.UTC)
-	stavTime3                    = time.Date(2019, time.February, 13, 11, 1, 1, 0, time.UTC)
-	stavTime4                    = time.Date(2019, time.February, 13, 11, 1, 31, 0, time.UTC)
-	stavInput = []InputEvent{
+	stavTime  = Time(time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC))
+	stavTime2 = Time(time.Date(2019, time.February, 13, 11, 0, 1, 0, time.UTC))
+	stavTime3 = Time(time.Date(2019, time.February, 13, 11, 1, 1, 0, time.UTC))
+	stavTime4 = Time(time.Date(2019, time.February, 13, 11, 1, 31, 0, time.UTC))
+	stavInput = []Event{
 		{
-			Event: Event{
-				Account: &Account{
-					ActiveCard:     true,
-					AvailableLimit: 1000,
-				},
-				Transaction: nil,
+			Account: &Account{
+				ActiveCard:     true,
+				AvailableLimit: 1000,
+			},
+			Transaction: nil,
+		},
+		{
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "Philadelphia Phillies",
+				Amount:   1250,
+				Time:     stavTime,
 			},
 		},
 		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "Philadelphia Phillies",
-					Amount:   1250,
-					Time:     stavTime,
-				},
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "Cleveland Indians",
+				Amount:   2500,
+				Time:     stavTime2,
 			},
 		},
 		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "Cleveland Indians",
-					Amount:   2500,
-					Time:     stavTime2,
-				},
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "Milwaukee Brewers",
+				Amount:   800,
+				Time:     stavTime3,
 			},
 		},
 		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "Milwaukee Brewers",
-					Amount:   800,
-					Time:     stavTime3,
-				},
-			},
-		},
-		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "Cincinnati Reds",
-					Amount:   80,
-					Time:     stavTime4,
-				},
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "Cincinnati Reds",
+				Amount:   80,
+				Time:     stavTime4,
 			},
 		},
 	}
@@ -728,58 +672,48 @@ var (
 		},
 	}
 
-	stadtvTime                     = time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC)
-	stadtvTime2                    = time.Date(2019, time.February, 13, 11, 0, 1, 0, time.UTC)
-	stadtvTime3                    = time.Date(2019, time.February, 13, 11, 1, 1, 0, time.UTC)
-	stadtvTime4                    = time.Date(2019, time.February, 13, 11, 1, 31, 0, time.UTC)
-	stadtvInput = []InputEvent{
+	stadtvTime  = Time(time.Date(2019, time.February, 13, 11, 0, 0, 0, time.UTC))
+	stadtvTime2 = Time(time.Date(2019, time.February, 13, 11, 0, 1, 0, time.UTC))
+	stadtvTime3 = Time(time.Date(2019, time.February, 13, 11, 1, 1, 0, time.UTC))
+	stadtvTime4 = Time(time.Date(2019, time.February, 13, 11, 1, 31, 0, time.UTC))
+	stadtvInput = []Event{
 		{
-			Event: Event{
-				Account: &Account{
-					ActiveCard:     true,
-					AvailableLimit: 1000,
-				},
-				Transaction: nil,
+			Account: &Account{
+				ActiveCard:     true,
+				AvailableLimit: 1000,
+			},
+			Transaction: nil,
+		},
+		{
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "Philadelphia Phillies",
+				Amount:   1250,
+				Time:     stadtvTime,
 			},
 		},
 		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "Philadelphia Phillies",
-					Amount:   1250,
-					Time:     stadtvTime,
-				},
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "Cleveland Indians",
+				Amount:   2500,
+				Time:     stadtvTime2,
 			},
 		},
 		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "Cleveland Indians",
-					Amount:   2500,
-					Time:     stadtvTime2,
-				},
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "Cleveland Indians",
+				Amount:   800,
+				Time:     stadtvTime3,
 			},
 		},
 		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "Cleveland Indians",
-					Amount:   800,
-					Time:     stadtvTime3,
-				},
-			},
-		},
-		{
-			Event: Event{
-				Account: nil,
-				Transaction: &Transaction{
-					Merchant: "Philadelphia Phillies",
-					Amount:   80,
-					Time:     stadtvTime4,
-				},
+			Account: nil,
+			Transaction: &Transaction{
+				Merchant: "Philadelphia Phillies",
+				Amount:   80,
+				Time:     stadtvTime4,
 			},
 		},
 	}

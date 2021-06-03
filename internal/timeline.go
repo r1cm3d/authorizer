@@ -15,30 +15,7 @@ const (
 )
 
 type (
-	Timer interface {
-		Now() time.Time
-	}
-	Violation string
-	Account   struct {
-		ActiveCard     bool
-		AvailableLimit int
-	}
-	Transaction struct {
-		Merchant string
-		Amount   int
-		time.Time
-	}
-	Event struct {
-		*Account
-		*Transaction
-	}
-	InputEvent struct {
-		Event
-	}
-	OutputEvent struct {
-		Event
-		Violations []Violation
-	}
+
 	Timeline struct {
 		events []OutputEvent
 		timer  Timer
@@ -53,7 +30,7 @@ func (t Timeline) Events() []OutputEvent {
 	return t.events
 }
 
-func (t *Timeline) Process(ie InputEvent) {
+func (t *Timeline) Process(ie Event) {
 	if ie.isInitEvent() {
 		t.init(*ie.Account)
 		return
@@ -118,7 +95,7 @@ func (t Timeline) validate(tr Transaction, availableLimit int) []Violation {
 	const maxAllowedDT = 1
 	const minIntervalAllowed = 2
 	betweenFilter := func(e Event) bool {
-		diff := tr.Time.Sub(e.Time)
+		diff := time.Time(tr.Time).Sub(time.Time(e.Time))
 		return diff.Minutes() <= minIntervalAllowed
 	}
 	betweenFilterSameMerchant := func(e Event) bool {
