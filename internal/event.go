@@ -7,27 +7,35 @@ import (
 )
 
 type (
-	Time time.Time
+	Time  time.Time
 	Timer interface {
 		Now() time.Time
 	}
 	Violation string
 	Account   struct {
-		ActiveCard     bool `json:"active-card,omitempty"`
-		AvailableLimit int `json:"available-limit,omitempty"`
+		ActiveCard     bool `json:"active-card"`
+		AvailableLimit int  `json:"available-limit"`
 	}
 	Transaction struct {
 		Merchant string `json:"merchant"`
-		Amount   int `json:"amount"`
-		Time Time `json:"time"`
+		Amount   int    `json:"amount"`
+		Time     Time   `json:"time"`
 	}
 	Event struct {
-		*Account `json:"account"`
+		*Account     `json:"account"`
 		*Transaction `json:"transaction"`
 	}
 	TimelineEvent struct {
 		Event
 		Violations []Violation
+	}
+	OutputAccount struct {
+		ActiveCard     *bool `json:"active-card,omitempty"`
+		AvailableLimit *int  `json:"available-limit,omitempty"`
+	}
+	Output struct {
+		OutputAccount `json:"account"`
+		Violations []Violation   `json:"violations"`
 	}
 )
 
@@ -47,17 +55,8 @@ func (it *Time) UnmarshalJSON(data []byte) error {
 }
 
 func (te TimelineEvent) String() string {
-	//TODO: extract it to top of the file
-	type Account struct {
-		ActiveCard     *bool `json:"active-card,omitempty"`
-		AvailableLimit *int `json:"available-limit,omitempty"`
-	}
-	type output struct {
-		Account `json:"account"`
-		Violations []Violation `json:"violations"`
-	}
-	op := output{
-		Account:   Account{
+	op := Output{
+		OutputAccount: OutputAccount{
 			ActiveCard:     nil,
 			AvailableLimit: nil,
 		},

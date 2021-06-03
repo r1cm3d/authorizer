@@ -30,7 +30,6 @@ func (t Timeline) Events() []TimelineEvent {
 }
 
 //TODO:
-// - Implement unmarshal for TimelineEvent
 // - Implement LastEvent method
 // - Implement integration test for the application
 // - Implement acceptance tests for the application
