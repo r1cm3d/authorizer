@@ -35,8 +35,10 @@ The output should be:
 {"Account":{"active-card":true,"available-limit":50},"violations":[]}
 
 ```
-
+Running on [Bash](https://www.gnu.org/software/bash/)
 ![](img/tldr.gif)
+
+Running on [On My Zsh](https://ohmyz.sh/)
 ![](img/omzs.gif)
 ### Prerequisites
 ![Diff 3.7](img/diff)
