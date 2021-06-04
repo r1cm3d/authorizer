@@ -47,9 +47,6 @@ func (t Timeline) Last() *TimelineEvent {
 	return &t.events[len(t.events)-1]
 }
 
-//TODO:
-// - Take a look at documentation one more time and find any overlooked
-
 // Process adds an Event into Timeline. It could be either an initialization Event or a Transaction Event.
 func (t *Timeline) Process(ie Event) {
 	if !ie.isTransaction() {
