@@ -36,6 +36,8 @@ The output should be:
 
 ```
 
+![](img/tldr.gif)
+![](img/omzs.gif)
 ### Prerequisites
 ![Diff 3.7](img/diff)
 ![Make 4.2.1](img/make)
@@ -76,6 +78,7 @@ to run it.
 ``` shell
 make test
 ```
+![](img/make_test.gif)
 #### Acceptance test
 ``` shell
 make install && ./acceptance_tests
@@ -84,3 +87,4 @@ Acceptance tests emulates the real execution of the application. It uses all inp
 [data](data/) directory and compares the result with each respective expected output file. It was tested on
 [Bash](https://www.gnu.org/software/bash/) and [On My Zsh](https://ohmyz.sh/). I did not test it 
 on others unpopular shells as csh, sh or pwsh.
+![](img/acceptance_tests.gif)
