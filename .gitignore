@@ -1,6 +1,7 @@
 *.test
 *.out
 authorizer
+application
 .idea/
 
 
