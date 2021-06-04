@@ -48,7 +48,6 @@ func (t Timeline) Last() *TimelineEvent {
 }
 
 //TODO:
-// - Improve README
 // - Take a look at documentation one more time and find any overlooked
 
 // Process adds an Event into Timeline. It could be either an initialization Event or a Transaction Event.
