@@ -1,5 +1,0 @@
-	#!/usr/bin/sh
-	docker run --interactive \
-		--tty \
-		--rm \
-		recipe-aggregator application "$@"
