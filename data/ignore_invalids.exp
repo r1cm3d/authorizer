@@ -1,0 +1,7 @@
+
+{"Account":{"active-card":true,"available-limit":1000},"violations":[]}
+{"Account":{"active-card":true,"available-limit":1000},"violations":["insufficient-limit"]}
+{"Account":{"active-card":true,"available-limit":1000},"violations":["insufficient-limit"]}
+{"Account":{"active-card":true,"available-limit":200},"violations":[]}
+{"Account":{"active-card":true,"available-limit":120},"violations":[]}
+

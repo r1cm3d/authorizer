@@ -1,0 +1,5 @@
+
+{"Account":{},"violations":["Account-not-initialized"]}
+{"Account":{"active-card":true,"available-limit":225},"violations":[]}
+{"Account":{"active-card":true,"available-limit":200},"violations":[]}
+

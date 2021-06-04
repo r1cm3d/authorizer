@@ -48,9 +48,7 @@ func (t Timeline) Last() *TimelineEvent {
 }
 
 //TODO:
-// - Create docker infrastructure
 // - Implement integration test for the application
-// - Implement acceptance tests for the application
 // - Improve README
 // - Take a look at documentation one more time and find any overlooked
 
