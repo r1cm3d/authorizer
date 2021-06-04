@@ -8,7 +8,7 @@ import (
 )
 
 // Example
-// ./authorize < data/successful_transaction
+// ./authorize < data/operations
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	timeline := internal.NewTimeline()
