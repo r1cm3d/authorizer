@@ -3,3 +3,4 @@ scripts/
 configure
 authorize
 application
+acceptance_tests

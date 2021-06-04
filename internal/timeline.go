@@ -48,7 +48,6 @@ func (t Timeline) Last() *TimelineEvent {
 }
 
 //TODO:
-// - Implement integration test for the application
 // - Improve README
 // - Take a look at documentation one more time and find any overlooked
 

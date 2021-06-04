@@ -1,6 +1,6 @@
 #!/usr/bin/sh
 
-#                                           DISCLAIMER IMPORTANT
+#                                           IMPORTANT DISCLAIMER
 #
 # All commands in this script are POSIX standard compliant. I do not know if Darwin (MacOS) is compliance with all of them, so,
 # some of them may fail in this OS. Unfortunately, I do not have any Darwin computer around to test it (or fortunately ;] ).
