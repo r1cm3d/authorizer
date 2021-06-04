@@ -2,6 +2,7 @@
 *.out
 authorizer
 application
+acceptance_tests
 .idea/
 
 
